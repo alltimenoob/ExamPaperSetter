@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./fonts/source-sans-pro-v21-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local(''),
+       url('./fonts/source-sans-pro-v21-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('./fonts/source-sans-pro-v21-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('./fonts/source-sans-pro-v21-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('./fonts/source-sans-pro-v21-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('./fonts/source-sans-pro-v21-latin-regular.svg#SourceSansPro') format('svg'); /* Legacy iOS */
+}
+
+
+body {
+  overflow: hidden;
+  border-radius: 10px;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.TitleBar{
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+
+@layer components{
+  .TitleBar{
+   
+    @apply absolute top-0 h-8 min-w-full font-thin text-base flex items-center justify-between
+      pl-2 z-10  
+  }
+  
+  .TitleBarIcons{
+    -webkit-app-region: no-drag;
+    @apply h-5 w-5 text-white ml-2 mr-2 
+  }
+
+  .Drawer{
+    @apply flex pl-2 pt-2 pb-2 bg-transparent text-white mt-20 min-w-max flex-col
+  }
+
+  .DrawerItem{
+    @apply flex h-12 w-12 items-center justify-center p-2 text-center mb-1
+       hover:bg-gray-100 hover:opacity-50 cursor-pointer hover:text-primary
+      transition ease-in-out delay-75 rounded-r-none
+  }
+
+  .DrawerItemSelected{
+    @apply  bg-gray-100 text-primary hover:bg-gray-100 hover:opacity-100
+  }
+
+}
