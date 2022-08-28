@@ -1,4 +1,5 @@
 import '../App.css';
+import {VscChromeClose,VscChromeMaximize,VscChromeMinimize} from "react-icons/vsc"
 
 function TitleBar(props)
 {
@@ -9,21 +10,21 @@ function TitleBar(props)
         {/* Frame Name */}
 
         <div className="flex">  {/* Minimize Maximize Close Icons */}
-            <props.min className='TitleBarIcons' onClick={
+            {props.min&&<VscChromeMinimize className='TitleBarIcons' onClick={
                 ()=>{
                     window.api.minimize() /* API Call To Minimize The Window */
                 }
-            }/>
-            <props.max className='TitleBarIcons' onClick={
+            }/>}
+            {props.max&&<VscChromeMaximize className='TitleBarIcons' onClick={
                 ()=>{
                     window.api.maximize() /* API Call To Maximize The Window */
                 }
-            }/>
-            <props.close className='TitleBarIcons' onClick={
+            }/>}
+            {props.close&&<VscChromeClose className='TitleBarIcons' onClick={
                 ()=>{
-                    window.api.close() /* API Call To Close The Window */
+                    window.api.close(props.window) /* API Call To Close The Window */
                 }
-            }/>
+            }/>}
         </div>
         
 

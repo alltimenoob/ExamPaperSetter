@@ -3,12 +3,12 @@ const isDev = require('electron-is-dev'); // To check if electron is in developm
 const path = require('path');
 const sqlite= require('sqlite3');
 
-let mainWindow;
+let mainWindow,NewCourseWindow;
 
 // Initializing the Electron Window
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 768, 
+    width: 800, 
     height: 600,
     frame:false,
     webPreferences: {
@@ -32,7 +32,7 @@ const createWindow = () => {
 
   if (isDev) {
     mainWindow.webContents.on('did-frame-finish-load', () => {
-      mainWindow.webContents.openDevTools({ mode: 'detach' });
+      //mainWindow.webContents.openDevTools({ mode: 'detach' });
     });
   }
 };
@@ -103,6 +103,45 @@ ipcMain.handle("maximize",()=>{
 })
 
 // Function To Close Window
-ipcMain.handle("close",()=>{
-    app.quit()
+ipcMain.handle("close",(event,args)=>{
+    switch(args)
+    {
+      case "mainWindow" :
+          app.quit();
+          break;
+      case "NewCourseWindow":
+          NewCourseWindow.close()
+          break;
+      default:
+          break;
+    }
+})
+
+
+ipcMain.on("createCourse",(event,args)=>{
+  console.log(args);
+})
+
+
+ipcMain.handle("openNewCourse",()=>{
+
+
+   NewCourseWindow = new BrowserWindow({
+      parent: mainWindow,
+      modal:true,
+      height: 400,
+      width: 600,
+      frame:false,
+      webPreferences: {
+        preload: isDev 
+          ? path.join(app.getAppPath(), './public/preload.js')
+          : path.join(app.getAppPath(), './build/preload.js'),
+        worldSafeExecuteJavaScript: true,
+        contextIsolation: true, 
+      },
+    });
+
+    NewCourseWindow.loadURL( isDev
+      ? 'http://localhost:3000/createCourse'
+      : `file://${path.join(__dirname, '../build/index.html')}` );
 })
