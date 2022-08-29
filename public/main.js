@@ -1,8 +1,5 @@
-const { data } = require('autoprefixer');
-const { parseJson } = require('builder-util-runtime');
-const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron'); // electron
+const { app, BrowserWindow, ipcMain, } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
-const { resolve } = require('path');
 const path = require('path');
 const sqlite= require('sqlite3');
 
@@ -133,7 +130,6 @@ ipcMain.handle("createCourse",(event,args)=>{
 
 ipcMain.handle("getCourses",async (event,args)=>{
 //function returns JSON Object which contains list of courses
-var statusCode=0;
 const courses={};
 const retriveQuery='SELECT * from course';
 return new Promise((resolve,reject)=>{
