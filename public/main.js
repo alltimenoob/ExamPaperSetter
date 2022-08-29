@@ -1,3 +1,4 @@
+const { parseJson } = require('builder-util-runtime');
 const { app, BrowserWindow, ipcMain } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
 const path = require('path');
@@ -119,7 +120,13 @@ ipcMain.handle("close",(event,args)=>{
 
 
 ipcMain.on("createCourse",(event,args)=>{
-  console.log(args);
+  
+  console.log(args.course_code);
+  let isDataInserted=true;
+  //Insert Query for insert course details in course table
+  const insertQuery='INSERT INTO course(course_name,course_code) VALUES(?,?)';
+  database.run(insertQuery,[args.course_name,args.course_code],(error)=>{ if(error!=null) isDataInserted =false})
+  return isDataInserted;
 })
 
 
