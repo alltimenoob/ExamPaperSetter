@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('api', {
 
   openNewCourse : () => ipcRenderer.invoke('openNewCourse'), // Open New Course Window
 
-  createCourse : (args) => ipcRenderer.send('createCourse', args),
+  createCourse : args => ipcRenderer.invoke('createCourse', args), // Database Call For Create Course
 
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send
 

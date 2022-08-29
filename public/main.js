@@ -119,7 +119,7 @@ ipcMain.handle("close",(event,args)=>{
 })
 
 
-ipcMain.on("createCourse",(event,args)=>{
+ipcMain.handle("createCourse",(event,args)=>{
   
   console.log(args.course_code);
   let isDataInserted=true;

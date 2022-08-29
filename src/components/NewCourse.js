@@ -3,20 +3,16 @@ import TitleBar from "./TitleBar"
 
 function NewCourse()
 {
-    const [course_name,setCourseName] = useState()
-    const [course_code,setCourseCode] = useState()
+    const [course_name,setCourseName] = useState("")
+    const [course_code,setCourseCode] = useState("")
 
     const createCourse = async (args) =>{
         if(args!=null)
         {
-            new Promise((resolve)=>{
-                return await window.api.createCourse(args)
-            }).then((args)=>{
-                if(args)
-                    window.api.close("NewCourseWindow")
-            })
+            const result = await window.api.createCourse(args)
+            if(result)
+                window.api.close("NewCourseWindow")
         }
-
     }
     
     return(
