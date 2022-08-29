@@ -9,9 +9,10 @@ function NewCourse()
     const createCourse = async (args) =>{
         if(args!=null)
         {
-            const result = await window.api.createCourse(args)
-            if(result)
-                window.api.close("NewCourseWindow")
+            const result = await window.api.getCourses()
+            console.log(result)
+            //if(result)
+                //window.api.close("NewCourseWindow")
         }
     }
     
