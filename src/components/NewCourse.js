@@ -8,7 +8,15 @@ function NewCourse()
 
     const createCourse = async (args) =>{
         if(args!=null)
-        await window.api.createCourse(args)
+        {
+            new Promise((resolve)=>{
+                return await window.api.createCourse(args)
+            }).then((args)=>{
+                if(args)
+                    window.api.close("NewCourseWindow")
+            })
+        }
+
     }
     
     return(
