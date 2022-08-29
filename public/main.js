@@ -1,6 +1,8 @@
+const { data } = require('autoprefixer');
 const { parseJson } = require('builder-util-runtime');
-const { app, BrowserWindow, ipcMain } = require('electron'); // electron
+const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
+const { resolve } = require('path');
 const path = require('path');
 const sqlite= require('sqlite3');
 
@@ -128,6 +130,27 @@ ipcMain.handle("createCourse",(event,args)=>{
   database.run(insertQuery,[args.course_name,args.course_code],(error)=>{ if(error!=null) isDataInserted =false})
   return isDataInserted;
 })
+
+ipcMain.handle("getCourses",async (event,args)=>{
+//function returns JSON Object which contains list of courses
+var statusCode=0;
+const courses={};
+const retriveQuery='SELECT * from course';
+return new Promise((resolve,reject)=>{
+    database.each(retriveQuery,
+    (error, row) => {
+        if(error!=null)
+        {
+          return reject({statusCode:0,errorMessage:error} );
+        }
+        courses[row.course_code]=row.course_name;
+        resolve({statusCode:1,coursrs:courses});
+        }
+      )
+  })
+})
+
+
 
 
 ipcMain.handle("openNewCourse",()=>{

@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('api', {
 
   createCourse : args => ipcRenderer.invoke('createCourse', args), // Database Call For Create Course
 
+  getCourses : args => ipcRenderer.invoke('getCourses'),
+
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send
 
   testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data) }) // Example Receive
