@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 2022/08/29-14:45:09.566 6e6f Reusing MANIFEST /home/krupal/React Labs/ExamPaperSetter/userdata/Local Storage/leveldb/MANIFEST-000001
 2022/08/29-14:45:09.566 6e6f Recovering log #3
 2022/08/29-14:45:09.566 6e6f Reusing old log /home/krupal/React Labs/ExamPaperSetter/userdata/Local Storage/leveldb/000003.log 
+=======
+2022/08/29-15:15:06.416 1d9c Reusing MANIFEST /home/mihir/Best/ExamPaperSetter/userdata/Local Storage/leveldb/MANIFEST-000001
+2022/08/29-15:15:06.416 1d9c Recovering log #3
+2022/08/29-15:15:06.416 1d9c Reusing old log /home/mihir/Best/ExamPaperSetter/userdata/Local Storage/leveldb/000003.log 
+>>>>>>> 78aef78 (Half Implemented Create Course Window)
