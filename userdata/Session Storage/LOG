@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 2022/08/29-10:45:12.481 99f Reusing MANIFEST /home/mihir/Best/ExamPaperSetter/userdata/Session Storage/MANIFEST-000001
 2022/08/29-10:45:12.481 99f Recovering log #3
 2022/08/29-10:45:12.482 99f Reusing old log /home/mihir/Best/ExamPaperSetter/userdata/Session Storage/000003.log 
+=======
+2022/08/29-11:25:51.138 45f3 Reusing MANIFEST /home/krupal/React Labs/ExamPaperSetter/userdata/Session Storage/MANIFEST-000001
+2022/08/29-11:25:51.138 45f3 Recovering log #3
+2022/08/29-11:25:51.139 45f3 Reusing old log /home/krupal/React Labs/ExamPaperSetter/userdata/Session Storage/000003.log 
+>>>>>>> 6876bd2718e192f45185eb2cac7a6b11ae59ff57
