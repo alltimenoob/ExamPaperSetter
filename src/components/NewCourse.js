@@ -258,7 +258,7 @@ function NewCourse()
 								createCourse()
 							}
 							
-						}}>Next</button>
+						}}>Finish</button>
 
 				<button className="absolute bottom-5 right-[140px] Button w-[100px] opacity-80"
 						onClick={()=>{ setPage("CO")} }>Back</button> 
