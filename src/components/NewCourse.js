@@ -1,105 +1,269 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import TitleBar from "./TitleBar"
-import {AiFillPlusCircle} from "react-icons/ai"
+import {AiFillPlusCircle,AiTwotoneDelete} from "react-icons/ai"
+import ContextMenu from "./ContextMenu"
 
 function NewCourse()
 {
-    const [course_name,setCourseName] = useState("")
-    const [course_code,setCourseCode] = useState("")
-	const [page,setPage] =  useState("Course")
-	const [NumberOfCO,setNumberOfCO] = useState(1);
+    const [CourseName,setCourseName] = useState("")
+    const [CourseCode,setCourseCode] = useState("")
+	const [Page,setPage] =  useState("Course")
+	
+	const [CourseOutcomeList,setCourseOutcomeList] = useState([{"value":""}])
+	const [UnitList,setUnitList] = useState([{"value":""}])
 
-    const createCourse = async (args) =>{
-        if(args!=null)
-        {
-            const result = await window.api.getCourses()
-            console.log(result)
-            //if(result)
-                //window.api.close("NewCourseWindow")
-        }
+	const [SelectedTextBox,setSelectedTextBox] = useState(0)
+	
+	const TextBoxContextMenuItems = [
+		<li className="flex justify-center text-primary items-center cursor-pointer hover:bg-primary/10 "
+			key={0}
+			onClick={()=>{
+				
+				if(Page==="CO")
+				{
+					let list = CourseOutcomeList.filter((_,i,__)=>{return i!==SelectedTextBox})
+					setCourseOutcomeList(list)
+				}
+				else if(Page==="Unit")
+				{
+				
+					let list = UnitList.filter((_,i,__)=>{return i!==SelectedTextBox})
+					setUnitList(list)
+				}
+			}}>
+			<AiTwotoneDelete />
+			<span className="p-1 text-sm">Remove</span>
+		</li>
+	]
+
+	const [x,setX] = useState(0)
+	const [y,setY] = useState(0)
+
+    const createCourse = async () =>{
+        
+        let output = {
+			"name":CourseName,
+			"code":CourseCode,
+			"co":CourseOutcomeList,
+			"unit":UnitList
+		}
+		const result = await window.api.createCourse(output)
+		
+		if(result)
+            window.api.close("NewCourseWindow")
+    
     }
-   
-	const [COFields,setCOFields] = useState([])
-	const [COFieldsValues,setCOFieldsValues] = useState([])
-
-	useEffect(()=>{
-		setCOFields([])
-
-		let temp = []
-		for(let i = 1 ; i <= NumberOfCO ; i++)
-		{
-			temp.push( 
-			<input type="text" 
-			className='TextBox mb-2 w-full' 
-			value={COFieldsValues[i]} 
-			onChange={(event)=>{
-				let values = COFieldsValues
-				values[i] = event.target.value
-				setCOFieldsValues(values)}
-			}
-			placeholder={'Course Outcome '+i} />)
-		}	
-
-		setCOFields(temp)
-			
-	},[NumberOfCO])
-
+ 
 	return(
-    <div className="App">
-					
+    <div className="App" onClick={()=>{setX(0);setY(0)}}>
+		<ContextMenu items={TextBoxContextMenuItems} x={x} y={y} ></ContextMenu>
+
         <TitleBar close={true} max={false} min={false} window="NewCourseWindow"></TitleBar>
 
         <div className="h-screen w-screen mt-8 bg-white flex justify-center items-start ">
-		{(page == "Course") && <div className="grid grid-flow-row items-center mt-20 justify-center gap-4">
-        <span className='select-none text-[20px]'>Create New Course</span>
-        
-        <input type="text" 
-        className='TextBox' 
-        value={course_name} 
-        onChange={(event)=>setCourseName(event.target.value)}
-        placeholder='Course Name'/>
+		
+			{(Page === "Course") && 
+			<div className="grid grid-flow-row items-center mt-20 justify-center gap-4">
+				
+				<span className='select-none text-[20px]'>Add New Course</span>
 
-        <input type="text" 
-        className='TextBox' 
-        value={course_code} 
-        onChange={(event)=>setCourseCode(event.target.value)}
-        placeholder='Course Code'/>
-        
-		{/*    <button className="Button" onClick={()=>
-			{
-				if(course_name!=""&&course_code!="")
-				createCourse({"course_name":course_name,"course_code":course_code})}
-			}>Create</button>
-         */}
-			<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
-		onClick={()=>{ } }>Cancel</button>
+				<input type="text" 
+					className='TextBox' 
+					value={CourseName} 
+					onChange={(event)=>setCourseName(event.target.value)}
+					placeholder='Course Name'/>
 
-			<button className="absolute bottom-5 right-[140px] Button w-[100px] " onClick={
-			()=> { setPage("CO") } }>Next</button> 
-	 </div>}
-		{ (page == "CO") && <div className="grid grid-flow-row items-center mt-1 justify-center gap-2 p-2">
-        <span className='select-none text-[20px]'>Create Course Outcomes</span>
-		<div className="overflow-y-scroll w-screen min-h-[250px] max-h-[250px] p-6 ">
-				{COFields}
-			<AiFillPlusCircle className="m-auto h-[28px] text-primary cursor-pointer" 
-			onClick={
-				()=>{
-					setNumberOfCO(NumberOfCO+1)
-				}
-			}/>
-		</div>
+				<input type="text" 
+					className='TextBox' 
+					value={CourseCode} 
+					onChange={(event)=>setCourseCode(event.target.value)}
+					placeholder='Course Code'/>
 
-		{/*    <button className="Button" onClick={()=>
-			{
-				if(course_name!=""&&course_code!="")
-				createCourse({"course_name":course_name,"course_code":course_code})}
-			}>Create</button>
-         */}
-			<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
-		onClick={()=>{ } }>Cancel</button>
+				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
+						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
 
-			<button className="absolute bottom-5 right-[140px] Button w-[100px] ">Next</button> 
-	 </div>}
+				<button className="absolute bottom-5 right-[140px] Button w-[100px] " 
+						onClick={()=> { 
+							if(CourseCode!==""&&CourseName!=="")
+							{
+								setPage("CO")
+							}	
+							else
+							{
+								const options = {
+								"window" : "NewCourseWindow",
+								"options" : {
+									type: 'warning',
+									buttons: ['Cancel'],
+									title: 'Alert',
+									message: 'You cannot proceed further!',
+									detail: 'Enter Correct Course Details.',
+								}};
+								
+								window.api.showDialog(options)
+							}	
+								
+						} }>Next</button> 
+
+			</div>}
+
+			
+			{ (Page === "CO") && 
+			<div className="grid grid-flow-row items-center justify-center gap-2 p-2">
+				<span className='select-none text-[20px]'>Add Course Outcomes</span>
+				<div className="overflow-y-scroll w-screen h-[250px] pl-4 pr-4 ">
+					
+				{CourseOutcomeList.map((co,index)=>
+				(<input type="text" 
+						className='TextBox mb-2 w-full' 
+						key={index}
+						id={index}
+						value={co.value} 
+						onContextMenu={(event)=>{
+										
+							setSelectedTextBox(parseInt(event.target.id))
+										
+							if(event.pageX+120 > window.innerWidth)
+							{
+								setX(event.pageX-120)
+							}
+							else
+							{
+								setX(event.pageX)
+							}
+									
+							setY(event.pageY)}
+						}
+
+						onChange={(event)=>{
+								let list = [...CourseOutcomeList]
+								list[event.target.id] = {"value":event.target.value};
+								setCourseOutcomeList(list)
+							}
+						}
+
+						placeholder={ `Course Outcome ${index+1}` } />
+					))
+					}
+
+					<AiFillPlusCircle className="m-auto h-[28px] text-primary cursor-pointer" 
+					onClick={
+						()=>{
+							setCourseOutcomeList([...CourseOutcomeList,{"value":""}])
+						}
+					}/>
+
+				</div>
+
+				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
+						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
+
+				<button className="absolute bottom-5 right-[260px] Button w-[100px] "
+						onClick={()=>{
+							
+							const options = {
+								"window" : "NewCourseWindow",
+								"options" : {
+									type: 'warning',
+									buttons: ['Cancel'],
+									title: 'Alert',
+									message: 'You cannot proceed further!',
+									detail: 'Enter Correct Course Outcomes Details.',
+							}};
+							
+							var l = CourseOutcomeList.filter((value)=> { return value.value==="" }).length
+							if(l>0){
+								window.api.showDialog(options)
+								return
+							}
+							else
+								setPage("Unit")
+							
+							
+						}}>Next</button>
+
+				<button className="absolute bottom-5 right-[140px] Button w-[100px] opacity-80"
+						onClick={()=>{ setPage("Course")} }>Back</button> 
+
+			</div>}
+
+			{ (Page === "Unit") && 
+			<div className="grid grid-flow-row items-center justify-center gap-2 p-2">
+				<span className='select-none text-[20px]'>Add Units</span>
+				<div className="overflow-y-scroll w-screen h-[250px] pl-4 pr-4 ">
+					
+					{UnitList.map((unit,index)=>(
+						<input type="text" 
+							className='TextBox mb-2 w-full' 
+							key={index}
+							id={index}
+							value={unit.value} 
+							onContextMenu={(event)=>{
+								setSelectedTextBox(parseInt(event.target.id))
+										
+								if(event.pageX+120 > window.innerWidth)
+								{
+									setX(event.pageX-120)
+								}
+								else
+								{
+									setX(event.pageX)
+								}
+									
+								setY(event.pageY)}
+							}
+
+							onChange={(event)=>{
+								let list = [...UnitList]
+								list[event.target.id] = {"value":event.target.value}
+								setUnitList(list)
+							}}
+							placeholder={ 'Unit' } />
+					))
+					}
+
+					<AiFillPlusCircle className="m-auto h-[28px] text-primary cursor-pointer" 
+					onClick={
+						()=>{
+							let list = [...UnitList,{"value":""}]
+							setUnitList(list)
+						}
+					}/>
+
+				</div>
+
+				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
+						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
+
+				<button className="absolute bottom-5 right-[260px] Button w-[100px] "
+						onClick={()=>{
+							
+							const options = {
+								"window" : "NewCourseWindow",
+								"options" : {
+									type: 'warning',
+									buttons: ['Cancel'],
+									title: 'Alert',
+									message: 'You cannot proceed further!',
+									detail: 'Enter Correct Unit Details.',
+							}};
+							
+							let l = UnitList.filter((value=>{return value!==""})).length
+
+							if(l<1){
+								window.api.showDialog(options)
+								return
+							}
+							else{
+								createCourse()
+							}
+							
+						}}>Next</button>
+
+				<button className="absolute bottom-5 right-[140px] Button w-[100px] opacity-80"
+						onClick={()=>{ setPage("CO")} }>Back</button> 
+
+			</div>}
         </div> 
     </div>
     )

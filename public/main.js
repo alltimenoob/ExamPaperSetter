@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, } = require('electron'); // electron
+const { app, BrowserWindow, ipcMain,dialog } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
 const path = require('path');
 const sqlite= require('sqlite3');
@@ -38,12 +38,12 @@ const createWindow = () => {
 };
 
 // ((OPTIONAL)) Setting the location for the userdata folder created by an Electron app. It default to the AppData folder if you don't set it.
-app.setPath(
+/*app.setPath(
   'userData',
   isDev
     ? path.join(app.getAppPath(), 'userdata/') // In development it creates the userdata folder where package.json is
     : path.join(process.resourcesPath, 'userdata/') // In production it creates userdata folder in the resources folder
-);
+);*/
 
 // When the app is ready to load
 app.whenReady().then(async () => {
@@ -102,6 +102,24 @@ ipcMain.handle("maximize",()=>{
     }
 })
 
+ipcMain.handle("showDialog",(event,args)=>{
+  let win = null;
+  switch(args.window)
+  {
+    case "mainWindow" :
+        win = mainWindow
+        break;
+    case "NewCourseWindow":
+        win = NewCourseWindow
+        break;
+    default:
+        break;
+  }
+
+  dialog.showMessageBox(win, args.options);
+})
+  
+
 // Function To Close Window
 ipcMain.handle("close",(event,args)=>{
     switch(args)
@@ -119,13 +137,8 @@ ipcMain.handle("close",(event,args)=>{
 
 
 ipcMain.handle("createCourse",(event,args)=>{
-  
-  console.log(args.course_code);
-  let isDataInserted=true;
-  //Insert Query for insert course details in course table
-  const insertQuery='INSERT INTO course(course_name,course_code) VALUES(?,?)';
-  database.run(insertQuery,[args.course_name,args.course_code],(error)=>{ if(error!=null) isDataInserted =false})
-  return isDataInserted;
+  console.log(args)
+  return true
 })
 
 ipcMain.handle("getCourses",async (event,args)=>{
