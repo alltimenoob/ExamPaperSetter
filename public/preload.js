@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('api', {
 
   createCourse : args => ipcRenderer.invoke('createCourse', args), // Database Call For Create Course
 
-  getCourses : args => ipcRenderer.invoke('getCourses'),
+  getCourses : () => ipcRenderer.invoke('getCourses'),
 
   showDialog : args => ipcRenderer.invoke('showDialog',args),
 
