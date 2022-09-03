@@ -138,6 +138,55 @@ ipcMain.handle("close",(event,args)=>{
 
 ipcMain.handle("createCourse",(event,args)=>{
   console.log(args)
+
+    console.log('Inside createCourse function');
+
+  // insertCourseQuery to Insert Courese details into database 
+  const insertCourseQuery='INSERT INTO course(course_code,course_name) VALUES(?,?)';
+
+  let course_id;
+  new Promise((resolve,reject)=>{
+    database.run(insertCourseQuery,[args.code,args.name],
+    function (error){
+      if(error)
+      {
+        return reject(-1);
+      }
+
+      return resolve(this.lastID);
+    }
+      )
+    }).then((result) => {
+      course_id=result;
+
+    //insertCoQuery to insert Co details into database
+      const insertCoQuery='INSERT INTO course_outcomes(course_outcomes_number,course_outcomes_description,course_id) VALUES(?,?,?)';
+      const cos=args.co.map((value)=>value.value);
+      //console.log(cos);
+      cos.forEach((co,index)=>{
+        database.run(insertCoQuery,[index+1,co,course_id],(error)=>{
+          if(error)
+          {
+            console.log(error);
+          }
+          console.log('CO '+(index+1)+' inserted.');
+        })
+      });
+      
+
+    //insertUnit to insert Unit details into database
+      const insertUnitQuery='INSERT INTO unit(unit_name,course_id) VALUES(?,?)';
+
+      args.unit.forEach((value)=>{
+        database.run(insertUnitQuery,[value.value,course_id],(error)=>{
+          if(error)
+          {
+            console.log(error);
+          }
+          console.log('unit '+value.value+' inserted.');
+      })
+      });
+    });
   return true
 })
 
