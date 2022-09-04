@@ -1,10 +1,11 @@
-const { app, BrowserWindow, ipcMain,dialog } = require('electron'); // electron
+const { app, BrowserWindow, ipcMain ,dialog } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
 const path = require('path');
 const fs = require('fs')
 const sqlite= require('sqlite3');
+const { parseJson } = require('builder-util-runtime');
 
-let mainWindow,NewCourseWindow;
+let mainWindow,CourseWindow;
 
 // Initializing the Electron Window
 const createWindow = () => {
@@ -25,7 +26,7 @@ const createWindow = () => {
   mainWindow.loadURL(
     isDev
       ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}` 
+      : `file://${path.join(__dirname, '../build/index.html')}`
   );
 
 	
@@ -48,9 +49,6 @@ app.setPath(
 
 // When the app is ready to load
 app.whenReady().then(async () => {
-
-  
-  
   await createWindow(); // Create the mainWindow
 });
 
@@ -113,8 +111,8 @@ ipcMain.handle("showDialog",(event,args)=>{
     case "mainWindow" :
         win = mainWindow
         break;
-    case "NewCourseWindow":
-        win = NewCourseWindow
+    case "CourseWindow":
+        win = CourseWindow
         break;
     default:
         break;
@@ -131,8 +129,9 @@ ipcMain.handle("close",(event,args)=>{
       case "mainWindow" :
           app.quit();
           break;
-      case "NewCourseWindow":
-          NewCourseWindow.close()
+      case "CourseWindow":
+          mainWindow.webContents.reloadIgnoringCache()
+          CourseWindow.close()
           break;
       default:
           break;
@@ -141,10 +140,6 @@ ipcMain.handle("close",(event,args)=>{
 
 
 ipcMain.handle("createCourse",(event,args)=>{
-  console.log(args)
-
-    console.log('Inside createCourse function');
-
   // insertCourseQuery to Insert Courese details into database 
   const insertCourseQuery='INSERT INTO course(course_code,course_name) VALUES(?,?)';
 
@@ -166,14 +161,14 @@ ipcMain.handle("createCourse",(event,args)=>{
     //insertCoQuery to insert Co details into database
       const insertCoQuery='INSERT INTO course_outcomes(course_outcomes_number,course_outcomes_description,course_id) VALUES(?,?,?)';
       const cos=args.co.map((value)=>value.value);
-      //console.log(cos);
+     
       cos.forEach((co,index)=>{
         database.run(insertCoQuery,[index+1,co,course_id],(error)=>{
           if(error)
           {
             console.log(error);
           }
-          console.log('CO '+(index+1)+' inserted.');
+          
         })
       });
       
@@ -187,7 +182,7 @@ ipcMain.handle("createCourse",(event,args)=>{
           {
             console.log(error);
           }
-          console.log('unit '+value.value+' inserted.');
+          
       })
       });
     });
@@ -208,20 +203,41 @@ ipcMain.handle("getCourses",async ()=>{
         if(error!=null)
             reject({statusCode:0,errorMessage:error});
 
-        courses.push({"code":row.course_code,"name":row.course_name});
+        courses.push({"id":row.course_id,"code":row.course_code,"name":row.course_name});
         resolve({statusCode:1,courses:courses});
         })
     })
 
 })
 
+// Opens Update Course Window On Edit Button Of Course
+ipcMain.handle("updateCourseWindow",(events,args)=>{
 
+  CourseWindow = new BrowserWindow({
+     parent: mainWindow,
+     modal:true,
+     height: 400,
+     width: 600,
+     frame:false,
+     webPreferences: {
+       preload: isDev 
+         ? path.join(app.getAppPath(), './public/preload.js')
+         : path.join(app.getAppPath(), './build/preload.js'),
+       worldSafeExecuteJavaScript: true,
+       contextIsolation: true, 
+     },
+   });
+   CourseWindow.setResizable(false)
+   
+   CourseWindow.loadURL( isDev
+     ? `http://localhost:3000/updateCourse/?course_name=${args.name}&course_id=${args.id}&course_code=${args.code}`
+     : `file://${path.join(__dirname, '../build/index.html')}` );
+})
 
 
 ipcMain.handle("openNewCourse",()=>{
 
-
-   NewCourseWindow = new BrowserWindow({
+   CourseWindow = new BrowserWindow({
       parent: mainWindow,
       modal:true,
       height: 400,
@@ -236,7 +252,7 @@ ipcMain.handle("openNewCourse",()=>{
       },
     });
 
-    NewCourseWindow.loadURL( isDev
+    CourseWindow.loadURL( isDev
       ? 'http://localhost:3000/createCourse'
       : `file://${path.join(__dirname, '../build/index.html')}` );
 })

@@ -10,6 +10,12 @@ contextBridge.exposeInMainWorld('api', {
 
   openNewCourse : () => ipcRenderer.invoke('openNewCourse'), // Open New Course Window
 
+  updateCourseWindow : (args) => ipcRenderer.invoke('updateCourseWindow',args), // Update Course Window
+
+  updateCourse : (args) => ipcRenderer.invoke('updateCourse',args), // Update Course
+
+  removeCourse : (args) => ipcRenderer.invoke('removeCourse',args), // Remove Course
+
   createCourse : args => ipcRenderer.invoke('createCourse', args), // Database Call For Create Course
 
   getCourses : () => ipcRenderer.invoke('getCourses'),

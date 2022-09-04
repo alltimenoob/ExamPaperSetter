@@ -50,7 +50,7 @@ function NewCourse()
 		const result = await window.api.createCourse(output)
 		
 		if(result)
-            window.api.close("NewCourseWindow")
+            window.api.close("CourseWindow")
     
     }
  
@@ -58,7 +58,7 @@ function NewCourse()
     <div className="App" onClick={()=>{setX(0);setY(0)}}>
 		<ContextMenu items={TextBoxContextMenuItems} x={x} y={y} ></ContextMenu>
 
-        <TitleBar close={true} max={false} min={false} window="NewCourseWindow"></TitleBar>
+        <TitleBar close={true} max={false} min={false} window="CourseWindow"></TitleBar>
 
         <div className="h-screen w-screen mt-8 bg-white flex justify-center items-start ">
 		
@@ -80,7 +80,7 @@ function NewCourse()
 					placeholder='Course Code'/>
 
 				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
-						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
+						onClick={()=>{ window.api.close("CourseWindow") } }>Cancel</button>
 
 				<button className="absolute bottom-5 right-[140px] Button w-[100px] " 
 						onClick={()=> { 
@@ -91,7 +91,7 @@ function NewCourse()
 							else
 							{
 								const options = {
-								"window" : "NewCourseWindow",
+								"window" : "CourseWindow",
 								"options" : {
 									type: 'warning',
 									buttons: ['Cancel'],
@@ -156,13 +156,13 @@ function NewCourse()
 				</div>
 
 				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
-						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
+						onClick={()=>{ window.api.close("CourseWindow") } }>Cancel</button>
 
 				<button className="absolute bottom-5 right-[260px] Button w-[100px] "
 						onClick={()=>{
 							
 							const options = {
-								"window" : "NewCourseWindow",
+								"window" : "CourseWindow",
 								"options" : {
 									type: 'warning',
 									buttons: ['Cancel'],
@@ -233,13 +233,13 @@ function NewCourse()
 				</div>
 
 				<button className="absolute bottom-5 right-[20px] Button w-[100px] opacity-80"
-						onClick={()=>{ window.api.close("NewCourseWindow") } }>Cancel</button>
+						onClick={()=>{ window.api.close("CourseWindow") } }>Cancel</button>
 
 				<button className="absolute bottom-5 right-[260px] Button w-[100px] "
 						onClick={()=>{
 							
 							const options = {
-								"window" : "NewCourseWindow",
+								"window" : "CourseWindow",
 								"options" : {
 									type: 'warning',
 									buttons: ['Cancel'],
@@ -248,9 +248,9 @@ function NewCourse()
 									detail: 'Enter Correct Unit Details.',
 							}};
 							
-							let l = UnitList.filter((value=>{return value!==""})).length
-
-							if(l<1){
+							let l = UnitList.filter((value=>{return value.value===""})).length
+							
+							if(l>0){
 								window.api.showDialog(options)
 								return
 							}
