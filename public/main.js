@@ -6,14 +6,27 @@ const sqlite= require('sqlite3');
 
 let mainWindow,CourseWindow;
 
+const getMetadata=()=>{
+  
+  const metadataPath=path.join(app.getAppPath(),'./metadata.json')
 
+  console.log(fs.existsSync(metadataPath))
+  if(fs.existsSync(metadataPath)===false)
+    return {takenTour:false};
+
+    const jsonString=fs.readFileSync(metadataPath,'utf8')
+    const metadata=JSON.parse(jsonString)
+
+    return metadata;
+}
 
 // Initializing the Electron Window
 const createWindow = () => {
-  let metadata ;
+  let metadata=getMetadata();
+  console.log(metadata)
   const windowParameters = {
-    width: metadata.takenTour ? 800 : 500 , 
-    height: metadata.takeTour ? 600 : 300,
+    width: metadata.isTourTaken ? 800 : 500 , 
+    height: metadata.isTourTaken ? 600 : 300,
     frame:false,
     webPreferences: {
       preload: isDev 
@@ -29,7 +42,7 @@ const createWindow = () => {
 	
   mainWindow.loadURL(
     isDev
-      ? metadata.takenTour ? 'http://localhost:3000/' : 'http://localhost:3000/WelcomeTour"
+      ? metadata.isTourTaken ? 'http://localhost:3000/' : 'http://localhost:3000/WelcomeTour'
       : `file://${path.join(__dirname, '../build/index.html')}`
   );
 	
@@ -237,6 +250,14 @@ ipcMain.handle("updateCourseWindow",(events,args)=>{
      : `file://${path.join(__dirname, '../build/index.html')}` );
 })
 
+
+ipcMain.handle('setCollegeMetaData',(event,args)=>{
+
+  if(args==null) return false;
+    args=JSON.stringify(args)
+    // console.log(args)
+    fs.writeFileSync(path.join(app.getAppPath(),'./metadata.json'),args);
+})
 
 ipcMain.handle("openNewCourse",()=>{
 
