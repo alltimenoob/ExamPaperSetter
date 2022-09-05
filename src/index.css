@@ -35,7 +35,7 @@
 }
 
 body {
-  
+  user-select: none;
   overflow: hidden;
   border-radius: 10px;
   margin: 0;
@@ -48,9 +48,7 @@ code {
     monospace;
 }
 
-span{
-  user-select: none;
-}
+
 
 .TitleBar{
   -webkit-user-select: none;

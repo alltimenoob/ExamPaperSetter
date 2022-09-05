@@ -280,9 +280,9 @@ ipcMain.handle("updateCourseWindow",(events,args)=>{
      },
    });
    CourseWindow.setResizable(false)
-   
+
    CourseWindow.loadURL( isDev
-     ? `http://localhost:3000/updateCourse/?course_name=${args.name}&course_id=${args.id}&course_code=${args.code}`
+     ? `http://localhost:3000/updateCourse/?course_id=${args.key}&page=${args.page}`
      : `file://${path.join(__dirname, '../build/index.html')}` );
 })
 

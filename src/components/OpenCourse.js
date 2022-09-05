@@ -1,6 +1,5 @@
 import TitleBar from "./TitleBar"
 import {BiBookContent} from "react-icons/bi"
-import {AiTwotoneDelete,AiFillEdit} from "react-icons/ai"
 import React from "react"
 import ContextMenu from "./ContextMenu"
 
@@ -42,23 +41,43 @@ class OpenCourse extends React.Component
       <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
           key={0}
           onClick={()=>{
-            let temp = this.state.ResultList.filter((value)=>{ return value.id === this.state.SelectedTextBox })
-            console.log(temp)
+            let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
+      
             if(temp[0]!==undefined)
-              updateCourse(temp[0]) 
+              updateCourse({"key":temp[0],"page":"Course"}) 
           }}>
-          <AiFillEdit />
-          <span className="p-1 text-sm">Edit</span>
+          <span className="ml-5 p-1 text-sm">Edit Course</span>
+		  </li>,
+      <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
+      key={0}
+      onClick={()=>{
+        let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
+  
+        if(temp[0]!==undefined)
+          updateCourse({"key":temp[0],"page":"CO"}) 
+      }}>
+      <span className="ml-5 p-1 text-sm">Edit COs</span>
+      </li>,
+      <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
+          key={0}
+          onClick={()=>{
+            let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
+      
+            if(temp[0]!==undefined)
+              updateCourse({"key":temp[0],"page":"Unit"}) 
+          }}>
+          
+          <span className="ml-5 p-1 text-sm">Edit Units</span>
 		  </li>,
       <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
           key={1}
           onClick={()=>{
-              let temp = this.state.SearchList.filter((value)=>{return value.id!==this.state.SelectedTextBox})
-              this.setState({"SearchList":temp})
-              removeCourse(this.state.SelectedTextBox)
+              let temp = this.state.SearchList.filter((value)=>{return value.id.toString() !== this.state.SelectedTextBox})
+              this.setState({"SearchList":temp},()=>{
+                removeCourse(this.state.SelectedTextBox)
+              })
           }}>
-          <AiTwotoneDelete />
-          <span className="p-1 text-sm">Remove</span>
+          <span className="ml-5 p-1 text-sm">Remove</span>
 		  </li>
     ]
     return(
@@ -94,8 +113,9 @@ class OpenCourse extends React.Component
                  
                   return(<div key={value.id} id={value.id}  className=" border-2 w-full items-center p-2 flex h-[60px] shadow rounded  hover:cursor-pointer"
                           onContextMenu={(event)=>{			
-                           
-                            this.setState({"SelectedTextBox":parseInt(event.target.id)},()=>{
+                            
+                            this.setState({"SelectedTextBox":event.currentTarget.id},()=>{
+                            
                               if(event.pageX+120 > window.innerWidth)
                               {
                                 this.setState({"x":(event.pageX-120)})
@@ -104,9 +124,8 @@ class OpenCourse extends React.Component
                               {
                                 this.setState({"x":(event.pageX)})
                               }
-              
+
                               this.setState({"y":(event.pageY)})
-                            
                             })
                           }
                             
