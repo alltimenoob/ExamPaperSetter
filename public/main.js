@@ -251,6 +251,58 @@ ipcMain.handle("updateCourseWindow",(events,args)=>{
 })
 
 
+//Remove course from database
+ipcMain.handle("removeCourse",async(event,args)=>{
+
+  let status;
+  const removeCourseQuery="DELETE FROM course WHERE course_id=?";
+    new Promise((resolve,reject)=>
+    {
+      database.run(removeCourseQuery,[args],(error)=>{
+        if(error!=null)
+        {
+          console.log(error);
+          reject(false);
+        }
+        console.log('couse with course_id '+args+' removed succesfully');
+        resolve(true);
+      })
+    }).then(
+    function(res)
+    {
+      status=res;
+    }
+  );
+
+  return status;
+});
+
+// Update Course function
+ipcMain.handle("updateCourse",async(event,args)=>{
+
+  const course_id=args.CourseID;
+  const course_name=args.CourseName;
+  const course_code=args.CourseCode;
+  //update Query to updatecourse details
+  const updateCourseQuery='UPDATE course SET course_code=? , course_name=? WHERE course_id=?'
+
+  const status=new Promise((resolve,reject)=>{
+
+    database.run(updateCourseQuery,[course_code,course_name,course_id],(error)=>{
+      if(error)
+      {
+        console.log(error);
+        reject(false);
+      }
+      console.log('course with course_id '+course_id+' updated successfully')
+      resolve(true)
+    })
+  })
+    return status;
+});
+
+
+
 ipcMain.handle('setCollegeMetaData',(event,args)=>{
 
   if(args==null) return false;
