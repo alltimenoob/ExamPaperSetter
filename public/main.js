@@ -6,14 +6,27 @@ const sqlite= require('sqlite3');
 
 let mainWindow,CourseWindow;
 
+const getMetadata=()=>{
+  
+  const metadataPath=path.join(app.getAppPath(),'./metadata.json')
 
+  console.log(fs.existsSync(metadataPath))
+  if(fs.existsSync(metadataPath)===false)
+    return {takenTour:false};
+
+    const jsonString=fs.readFileSync(metadataPath,'utf8')
+    const metadata=JSON.parse(jsonString)
+
+    return metadata;
+}
 
 // Initializing the Electron Window
 const createWindow = () => {
-  let metadata ;
+  let metadata=getMetadata();
+  console.log(metadata)
   const windowParameters = {
-    width: metadata.takenTour ? 800 : 500 , 
-    height: metadata.takeTour ? 600 : 300,
+    width: metadata.isTourTaken ? 800 : 500 , 
+    height: metadata.isTourTaken ? 600 : 300,
     frame:false,
     webPreferences: {
       preload: isDev 
@@ -29,7 +42,7 @@ const createWindow = () => {
 	
   mainWindow.loadURL(
     isDev
-      ? metadata.takenTour ? 'http://localhost:3000/' : 'http://localhost:3000/WelcomeTour"
+      ? metadata.isTourTaken ? 'http://localhost:3000/' : 'http://localhost:3000/WelcomeTour'
       : `file://${path.join(__dirname, '../build/index.html')}`
   );
 	
@@ -237,6 +250,66 @@ ipcMain.handle("updateCourseWindow",(events,args)=>{
      : `file://${path.join(__dirname, '../build/index.html')}` );
 })
 
+
+//Remove course from database
+ipcMain.handle("removeCourse",async(event,args)=>{
+
+  let status;
+  const removeCourseQuery="DELETE FROM course WHERE course_id=?";
+    new Promise((resolve,reject)=>
+    {
+      database.run(removeCourseQuery,[args],(error)=>{
+        if(error!=null)
+        {
+          console.log(error);
+          reject(false);
+        }
+        console.log('couse with course_id '+args+' removed succesfully');
+        resolve(true);
+      })
+    }).then(
+    function(res)
+    {
+      status=res;
+    }
+  );
+
+  return status;
+});
+
+// Update Course function
+ipcMain.handle("updateCourse",async(event,args)=>{
+
+  const course_id=args.CourseID;
+  const course_name=args.CourseName;
+  const course_code=args.CourseCode;
+  //update Query to updatecourse details
+  const updateCourseQuery='UPDATE course SET course_code=? , course_name=? WHERE course_id=?'
+
+  const status=new Promise((resolve,reject)=>{
+
+    database.run(updateCourseQuery,[course_code,course_name,course_id],(error)=>{
+      if(error)
+      {
+        console.log(error);
+        reject(false);
+      }
+      console.log('course with course_id '+course_id+' updated successfully')
+      resolve(true)
+    })
+  })
+    return status;
+});
+
+
+
+ipcMain.handle('setCollegeMetaData',(event,args)=>{
+
+  if(args==null) return false;
+    args=JSON.stringify(args)
+    // console.log(args)
+    fs.writeFileSync(path.join(app.getAppPath(),'./metadata.json'),args);
+})
 
 ipcMain.handle("openNewCourse",()=>{
 

@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('api', {
 
   getCourses : () => ipcRenderer.invoke('getCourses'),
 
+  setCollegeMetaData : (args) => ipcRenderer.invoke('setCollegeMetaData',args),
+
   showDialog : args => ipcRenderer.invoke('showDialog',args),
 
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send

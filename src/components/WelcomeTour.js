@@ -50,7 +50,12 @@ class WelcomeTour extends React.Component
                     <button className="Button w-[100px]
                  shadow-xl absolute bottom-5 right-6" 
                  onClick={()=>{
-                    //API Call
+                    window.api.setCollegeMetaData({
+                            "CollegeName" : this.state.CollegeName,
+                            "isTourTaken": this.state.CollegeName !== "" ? true : false,
+                            "isSubtitle":this.state.isSubtitle,
+                            "CollegeSubtitle":this.state.CollegeSubtitle
+                    })
                  }}>Submit</button>
             </div>}
         </div>)
