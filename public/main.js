@@ -3,15 +3,17 @@ const isDev = require('electron-is-dev'); // To check if electron is in developm
 const path = require('path');
 const fs = require('fs')
 const sqlite= require('sqlite3');
-const { parseJson } = require('builder-util-runtime');
 
 let mainWindow,CourseWindow;
 
+
+
 // Initializing the Electron Window
 const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 800, 
-    height: 600,
+  let metadata ;
+  const windowParameters = {
+    width: metadata.takenTour ? 800 : 500 , 
+    height: metadata.takeTour ? 600 : 300,
     frame:false,
     webPreferences: {
       preload: isDev 
@@ -19,16 +21,17 @@ const createWindow = () => {
         : path.join(app.getAppPath(), './build/preload.js'),
       worldSafeExecuteJavaScript: true,
       contextIsolation: true, 
-    },
-  });
+    }
+  }
+
+  mainWindow = new BrowserWindow(windowParameters);
 
 	
   mainWindow.loadURL(
     isDev
-      ? 'http://localhost:3000'
+      ? metadata.takenTour ? 'http://localhost:3000/' : 'http://localhost:3000/WelcomeTour"
       : `file://${path.join(__dirname, '../build/index.html')}`
   );
-
 	
   //mainWindow.setIcon(path.join(__dirname, 'images/appicon.ico'));
 

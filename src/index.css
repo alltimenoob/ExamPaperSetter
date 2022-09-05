@@ -35,7 +35,7 @@
 }
 
 body {
-  
+  user-select: none;
   overflow: hidden;
   border-radius: 10px;
   margin: 0;
@@ -46,10 +46,6 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
-}
-
-span{
-  user-select: none;
 }
 
 .TitleBar{
