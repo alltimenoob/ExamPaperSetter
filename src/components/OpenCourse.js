@@ -44,30 +44,9 @@ class OpenCourse extends React.Component
             let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
       
             if(temp[0]!==undefined)
-              updateCourse({"key":temp[0],"page":"Course"}) 
+              updateCourse(temp[0]) 
           }}>
           <span className="ml-5 p-1 text-sm">Edit Course</span>
-		  </li>,
-      <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
-      key={0}
-      onClick={()=>{
-        let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
-  
-        if(temp[0]!==undefined)
-          updateCourse({"key":temp[0],"page":"CO"}) 
-      }}>
-      <span className="ml-5 p-1 text-sm">Edit COs</span>
-      </li>,
-      <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
-          key={0}
-          onClick={()=>{
-            let temp = this.state.ResultList.filter((value)=>{ return value.id.toString() === this.state.SelectedTextBox })
-      
-            if(temp[0]!==undefined)
-              updateCourse({"key":temp[0],"page":"Unit"}) 
-          }}>
-          
-          <span className="ml-5 p-1 text-sm">Edit Units</span>
 		  </li>,
       <li className="flex justify-start text-primary items-center cursor-pointer hover:bg-primary/10 "
           key={1}
@@ -111,7 +90,11 @@ class OpenCourse extends React.Component
               {this.state.SearchList.length === 0 ? <span className="select-none text-[18px]">No Courses Found</span> : ""}
               {this.state.SearchList.map((value)=>{
                  
-                  return(<div key={value.id} id={value.id}  className=" border-2 w-full items-center p-2 flex h-[60px] shadow rounded  hover:cursor-pointer"
+                  return(<div 
+                          key={value.id} 
+                          id={value.id}  
+                          className=" border-2 w-full items-center p-2 flex h-[60px]
+                           shadow rounded  hover:cursor-pointer"
                           onContextMenu={(event)=>{			
                             
                             this.setState({"SelectedTextBox":event.currentTarget.id},()=>{
@@ -127,10 +110,11 @@ class OpenCourse extends React.Component
 
                               this.setState({"y":(event.pageY)})
                             })
-                          }
-                            
-                            
-                  } >
+                          }} 
+                          onClick={(event)=>{
+                            window.api.openCourse(event.currentTarget.id)
+                          }}
+                          >
                   <BiBookContent className="h-[60px] w-[25px]"/>
                   <div  className="flex ml-2 flex-col justify-center  p-2 items-start">
                     <span className="text-start text-[18px]">{value.name}</span>
