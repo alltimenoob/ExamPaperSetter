@@ -1,6 +1,7 @@
 import { useState } from "react"
 import TitleBar from "./TitleBar"
 import {AiFillPlusCircle} from "react-icons/ai"
+import {default as Select,components} from 'react-select';
 
 export default function AddQuestion(){
 
@@ -8,6 +9,31 @@ export default function AddQuestion(){
     const [SelectedType,setSelectedType] = useState("MCQ")
     const [Options,setOptions] = useState([{"value":""}])
     const [Question,setQuestion] = useState("")
+    const [Taxonomy,setTaxonomy] = useState("A")
+    
+    const [CourseOutcomeList,setCourseOutcomeList] = useState([{"label":"CO 1","value":"1"},{"label":"CO 2","value":"2"}]);
+    const [UnitsList,setUnitsList] = useState([{"label":"Unit 1","value":"1"},{"label":"Unit 2","value":"2"}]);
+    const [TypeList,setTypeList] = useState([{"value":"MCQ"},{"value":"Short"}])
+    const [TaxonomyList,setTaxonomyList] = useState([{"value":"Apply"},{"value":"Analyze"}])
+
+    const [SelectedCOList,setSelectedCOList] = useState([])
+    const [SelectedUnitList,setSelectedUnitList] = useState([])
+    const [ShowImage,setShowImage] = useState(false)
+
+    const component = (props)=>{
+        return( <div className="p-0">
+            <components.Option {...props} >
+              <input
+                type="checkbox"
+                checked={props.isSelected}
+                onChange={() => null}
+              />
+              <label className="ml-2">{props.label}</label>
+            </components.Option>
+          </div>)
+    }
+
+    
 
     return(
         <div className="App">
@@ -16,43 +42,81 @@ export default function AddQuestion(){
             <div className='mt-8 w-screen h-screen bg-white flex items-start'>
                 <div className="m-5 flex flex-col gap-2 w-screen h-screen">
                     
-                    <select className="TextBox" value={SelectedType} 
+                    <select className="TextBox w-full" value={SelectedType} 
                         onChange={(event)=>{
                             setSelectedType(event.currentTarget.value)
                             console.log(event.currentTarget.value)
                         }} id="types">
-                        <option value="MCQ">MCQ</option>
-                        <option value="saab">Saab</option>
-                        <option value="mercedes">Mercedes</option>
-                        <option value="audi">Audi</option>
+                        {TypeList.map((value,index)=>{
+                            return(<option key={index} value={value.value}>{value.value}</option>)
+                        })}
+                        
                     </select>
 
-                    <label className="TextBox flex items-center">
+                    <label className="TextBox w-full flex items-center">
                         <input type="checkbox" value={SelectUnit} onChange={()=>{setSelectUnit(!SelectUnit)}}  />
                         <span className="ml-5">Choose Units?</span>
                     </label>
 
-                    {!SelectUnit&&<select className="TextBox" id="types">
-                        <option value="volvo">Unit:1</option>
-                        <option value="saab">Saab</option>
-                        <option value="mercedes">Mercedes</option>
-                        <option value="audi">Audi</option>
-                    </select>}
 
-
-                    {SelectUnit&&<select className="TextBox" id="types">
-                        <option value="volvo">CO:1</option>
-                        <option value="saab">Saab</option>
-                        <option value="mercedes">Mercedes</option>
-                        <option value="audi">Audi</option>
-                    </select>}
+                    <select className="TextBox w-full" id="types" value={Taxonomy} 
+                    onChange={(event)=>{
+                        setTaxonomy(event.currentTarget.value)
+                    }}>
+                        {TaxonomyList.map((value,index)=>{
+                            return(<option key={index} value={value.value}>{value.value}</option>)
+                        })}
+                    </select>
                     
-                    <input type="text" className="TextBox" value={Question}
+                    {SelectUnit&&<span
+                        className="w-full p-0 text-[16px] text-start border-b-2 border-b-primary"
+                        data-toggle="popover"
+                        data-trigger="focus"
+                        data-content="">
+
+                        <Select
+                            options={CourseOutcomeList}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            hideSelectedOptions={false}
+                            components={{
+                                Option : component
+                            }}
+                            onChange={(list)=>{setSelectedCOList(list)}}
+                            allowSelectAll={true}
+                            value={SelectedCOList}
+                            />
+                    </span>}
+
+
+                    {!SelectUnit&&<span
+                        className="w-full p-0 text-[16px] text-start border-b-2 border-b-primary"
+                        data-toggle="popover"
+                        data-trigger="focus"
+                        data-content="">
+
+                        <Select
+                            options={UnitsList}
+                            isMulti
+                            closeMenuOnSelect={false}
+                            hideSelectedOptions={false}
+                            components={{
+                                Option : component
+                            }}
+                            onChange={(list)=>{setSelectedUnitList(list); console.log(list)}}
+                            allowSelectAll={true}
+                            value={SelectedUnitList}
+                            />
+                    </span>}
+                  
+
+                    
+                    <input type="text" className="TextBox w-full" value={Question}
                     onChange={(event)=>{
                         setQuestion(event.currentTarget.value)
                     }} placeholder="Enter Question"/>     
 
-                    {SelectedType==="MCQ"&&<div className="grid grid-flow-col grid-cols-6">
+                    {SelectedType==="MCQ"&&<div className="grid w-full grid-flow-col grid-cols-6">
                         
                         {Options.map((value,index)=>{
                           
@@ -78,15 +142,22 @@ export default function AddQuestion(){
                     
                     </div>}
 
-                    <input type="number" className="TextBox" placeholder="Enter Marks"/>                 
+                    <input type="number" className="TextBox w-full" placeholder="Enter Marks"/>                 
 
+                    <label className="TextBox w-full flex items-center justify-start">
+                        <input type="checkbox" onChange={()=>{setShowImage(!ShowImage)}}/>
+                        <span className="ml-2">Attach Image?</span>
+                    </label> 
+                    
 
-    
-
-                    <label className="Button w-[250px] flex items-center justify-center">
+                    {ShowImage&&<label className="Button w-full flex items-center justify-center">
                         <input type="file" className="hidden"/>
                         <span>Select Image</span>
-                    </label> 
+                    </label> }
+
+
+                    <button className="Button mt-5"> Submit </button>
+                    
                 </div>
                 
             </div>

@@ -25,15 +25,16 @@ export default function Course()
                 
                 <div className="w-[100px] h-[100px]  hover:opacity-75 cursor-pointer
                  bg-primary rounded flex items-center justify-center text-white"
-                 onClick={()=>{
-                    window.api.openAddQuestions(url.get("course_id"))
-                 }}
+                 
                  >
                     <span className="text-lg text-center">New Exam Paper </span>
                 </div>
                 
                 <div className="w-[100px] h-[100px] hover:opacity-75 cursor-pointer
-                 bg-primary rounded flex items-center justify-center text-white">
+                 bg-primary rounded flex items-center justify-center text-white"
+                 onClick={()=>{
+                    window.api.openAddQuestions(url.get("course_id"))
+                 }}>
                     <span className="text-lg text-center">Add Questions </span>
                 </div>
            
