@@ -63,6 +63,9 @@ input[type=number] {
   -webkit-app-region: drag;
 }
 
+
+
+
 @layer components{
   .TitleBar{
     @apply absolute top-0 h-8 min-w-full font-normal text-base flex items-center justify-between
@@ -89,13 +92,14 @@ input[type=number] {
   }
 
   .TextBox{
-    @apply h-[32px] w-[250px] shadow-lg pl-[6px] text-black text-[16px] border-b-primary 
+    @apply h-[40px] w-[250px] shadow-lg pl-[6px] text-black text-[16px] border-b-primary 
       border-2 outline-none rounded
   }
 
   .Button{
-    @apply h-[32px] pl-1 pr-1 rounded text-[16px] bg-primary text-white
+    @apply h-[40px] pl-1 pr-1 rounded text-[16px] bg-primary text-white
   }
 
+  
 
 }
