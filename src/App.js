@@ -17,7 +17,7 @@ function App() {
         <Route path='/WelcomeTour' element={<WelcomeTour/>} />
         <Route path="/AddQuestions" element={<AddQuestion />}/>
         <Route path="/updateCourse" element={<EditCourse />}/>
-        <Route index path='/' element={<OpenCourse/>}/>
+        <Route  path='/' element={<OpenCourse/>}/>
         <Route path='/createCourse' element={<NewCourse />} />
         <Route path='/course' element={<Course />} />
       </Routes>
