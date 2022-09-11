@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('api', {
 
   close: (args) => ipcRenderer.invoke('close',args), // Close The Window
 
+  goBack : () => ipcRenderer.invoke('goBack') , // Navigates To Previous Page
+
   openNewCourse : () => ipcRenderer.invoke('openNewCourse'), // Open New Course Window
 
   openCourse : (args) => ipcRenderer.invoke('openCourse',args), // Open New Course Window
@@ -24,6 +26,14 @@ contextBridge.exposeInMainWorld('api', {
 
   getCourses : () => ipcRenderer.invoke('getCourses'),
 
+  getUnits : (args) => ipcRenderer.invoke('getUnits',args), //get Units by course id
+  
+  getCOs : (args) => ipcRenderer.invoke('getCOs',args), //get Course Outcomes by course id
+
+  getQuestionTypes : () => ipcRenderer.invoke('getQuestionTypes'), //get Question types
+
+  getTaxonomy : () => ipcRenderer.invoke('getTaxonomy'), //get Taxonomy 
+
   getCourseFromID : (args) => ipcRenderer.invoke('getCourseFromID',args),
 
   setCollegeMetaData : (args) => ipcRenderer.invoke('setCollegeMetaData',args),
@@ -34,3 +44,4 @@ contextBridge.exposeInMainWorld('api', {
 
   testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data) }) // Example Receive
 });
+
