@@ -170,7 +170,7 @@ ipcMain.handle("createCourse",(event,args)=>{
       return resolve(this.lastID);
     }
       )
-    }).then((result) => {
+    }).then((result) => { 
       course_id=result;
 
     //insertCoQuery to insert Co details into database
@@ -302,7 +302,7 @@ ipcMain.handle("updateCourse",async(event,args)=>{
 });
 
 
-
+//Used to insert College Metadata into database.
 ipcMain.handle('setCollegeMetaData',(event,args)=>{
 
   if(args==null) return false;
@@ -330,6 +330,110 @@ ipcMain.handle('setCollegeMetaData',(event,args)=>{
         ? 'http://localhost:3000/' 
         : `file://${path.join(__dirname, '../build/index.html')}`
     );
+})
+
+//Retrive units of perticuler course
+ipcMain.handle("getUnits",(event,args)=>{
+
+  const getUnitsQuery=`SELECT * FROM UNITS WHERE course_id='${args}'`
+  const units=[]
+
+  return new Promise((resolve,reject)=>{
+    
+    database.each(getUnitsQuery,
+      (error, row) => {
+          
+        if(error!=null)
+            reject({statusCode:0,errorMessage:error});
+
+        units.push({"course_id":row.course_id,"unit_id":row.unit_id,"unit_name":row.unit_name});
+        resolve({statusCode:1,units:units});
+        })
+    })
+});
+
+//Retrive course_outcomes of perticuler course
+ipcMain.handle("getCOs",(event,args)=>{
+
+  const getCOsQuery=`SELECT * FROM course_outcomes WHERE course_id='${args}'`
+  const cos=[]
+
+  return new Promise((resolve,reject)=>{
+    
+    database.each(getCOsQuery,
+      (error, row) => {
+          
+        if(error!=null)
+            reject({statusCode:0,errorMessage:error});
+
+        cos.push({
+          "course_id":row.course_id,
+          "course_outcomes_id":row.course_outcomes_id,
+          "course_outcomes_description":row.course_outcomes_description,
+          "course_outcomes_number":row.course_outcomes_number,
+        });
+        resolve({statusCode:1,cos:cos});
+        })
+    })
+});
+
+/** to insert question types
+  
+  insert into question_type(question_type_name) VALUES ("MCQ"),("SHORT"),("MEDIUM"),("LONG")
+
+ */
+//get Question Types
+ipcMain.handle('getQuestionTypes',()=>{
+
+  const getQuestionTypesQuery=`SELECT * FROM question_type `
+  const question_types=[]
+
+  return new Promise((resolve,reject)=>{
+    
+    database.each(getQuestionTypesQuery,
+      (error, row) => {
+          
+        if(error!=null)
+            reject({statusCode:0,errorMessage:error});
+
+        question_types.push({
+          "question_type_id":row.question_type_id,
+          "question_type_name":row.question_type_name,
+        });
+        resolve({statusCode:1,question_types:question_types});
+        })
+    })
+})
+
+/** to insert Taxonomy
+ 
+ INSERT INTO 
+  taxonomy(taxonomy_name,taxonomy_letter) 
+  VALUES ('Remember','R'),('Understand','U'),('Apply','A'),('Analyze','N'),('Evaluate','E'),('Create','C')
+  
+ */
+//get Taxonomy
+ipcMain.handle('getTaxonomy',()=>{
+
+  const getTaxonomyQuery=`SELECT * FROM taxonomy`
+  const taxonomy=[]
+
+  return new Promise((resolve,reject)=>{
+    
+    database.each(getTaxonomyQuery,
+      (error, row) => {
+          
+        if(error!=null)
+            reject({statusCode:0,errorMessage:error});
+
+        taxonomy.push({
+          "taxonomy_id":row.taxonomy_id,
+          "taxonomy_name":row.taxonomy_name,
+          "taxonomy_letter":row.taxomony_letter,
+        });
+        resolve({statusCode:1,taxonomy:taxonomy});
+        })
+    })
 })
 
 ipcMain.handle("openNewCourse",()=>{
