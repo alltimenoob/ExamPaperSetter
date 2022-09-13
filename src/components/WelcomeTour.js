@@ -5,7 +5,7 @@ class WelcomeTour extends React.Component
     constructor(props){
         super(props)
 
-        this.state = {"Welcome":true,"CollegeConf":false,"CollegeName":"","CollegeSubtitle":"","isSubtitle":false}
+        this.state = {"Welcome":true,"InstituteConf":false,"InstituteName":"","InstituteSubtitle":"","isSubtitle":false}
     }
 
     componentDidMount(){
@@ -23,17 +23,17 @@ class WelcomeTour extends React.Component
                  text-primary bg-white w-[100px] 
                  shadow-xl absolute bottom-5 right-6" 
                  onClick={()=>{
-                    this.setState({"CollegeConf":true,"Welcome":false})
+                    this.setState({"InstituteConf":true,"Welcome":false})
                  }}>Start</button>
             </div>}
-            {this.state.CollegeConf && <div className="flex flex-col gap-3 items-center justify-center w-screen h-screen bg-white text-primary">
+            {this.state.InstituteConf && <div className="flex flex-col gap-3 items-center justify-center w-screen h-screen bg-white text-primary">
 
-                    <h1 className="absolute top-10 text-2xl ">College Configuration</h1>
+                    <h1 className="absolute top-10 text-2xl ">Institute Configuration</h1>
 
-                    <input type="text" className="TextBox" value={this.state.CollegeName}
+                    <input type="text" className="TextBox" value={this.state.InstituteName}
                     onChange={(event)=>{
-                        this.setState({"CollegeName":event.target.value})
-                    }} placeholder="College Name"/>
+                        this.setState({"InstituteName":event.target.value})
+                    }} placeholder="Institute Name"/>
 
                     <div>
                         <input type="checkbox" id="isSubtitle" 
@@ -42,20 +42,21 @@ class WelcomeTour extends React.Component
                             }} />
                     <label for="isSubtitle" className="ml-2">Do you want to provide Subtitle?</label></div>
                     
-                    { this.state.isSubtitle && <input type="text" className="TextBox" value={this.state.CollegeSubtitle}
+                    { this.state.isSubtitle && <input type="text" className="TextBox" value={this.state.InstituteSubtitle}
                     onChange={(event)=>{
-                        this.setState({"CollegeSubtitle":event.target.value})
-                    }} placeholder="College Subtitle"/>}
+                        this.setState({"InstituteSubtitle":event.target.value})
+                    }} placeholder="Institute Subtitle"/>}
 
                     <button className="Button w-[100px]
                  shadow-xl absolute bottom-5 right-6" 
                  onClick={()=>{
-                    window.api.setCollegeMetaData({
-                            "CollegeName" : this.state.CollegeName,
-                            "isTourTaken": this.state.CollegeName !== "" ? true : false,
+                    window.api.setInstituteMetaData({
+                            "InstituteName" : this.state.InstituteName,
+                            "isTourTaken": this.state.InstituteName !== "" ? true : false,
                             "isSubtitle":this.state.isSubtitle,
-                            "CollegeSubtitle":this.state.CollegeSubtitle
+                            "InstituteSubtitle":this.state.InstituteSubtitle
                     })
+                    
                  }}>Submit</button>
             </div>}
         </div>)

@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('api', {
 
   getCourseFromID : (args) => ipcRenderer.invoke('getCourseFromID',args),
 
-  setCollegeMetaData : (args) => ipcRenderer.invoke('setCollegeMetaData',args),
+  setInstituteMetaData : (args) => ipcRenderer.invoke('setInstituteMetaData',args),
 
   showDialog : args => ipcRenderer.invoke('showDialog',args),
 

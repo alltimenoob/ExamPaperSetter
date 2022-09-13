@@ -303,7 +303,7 @@ ipcMain.handle("updateCourse",async(event,args)=>{
 
 
 //Used to insert College Metadata into database.
-ipcMain.handle('setCollegeMetaData',(event,args)=>{
+ipcMain.handle('setInstituteMetaData',(event,args)=>{
 
   if(args==null) return false;
     args=JSON.stringify(args)
