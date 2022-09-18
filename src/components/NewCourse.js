@@ -1,7 +1,7 @@
 import { useState } from "react"
 import TitleBar from "./TitleBar"
-import {AiFillPlusCircle} from "react-icons/ai"
 import ContextMenu from "./ContextMenu"
+import {AiFillPlusCircle} from "react-icons/ai"
 
 function NewCourse()
 {

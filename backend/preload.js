@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('api', {
 
   openAddQuestions : (args) => ipcRenderer.invoke('openAddQuestions',args), // Open New Course Window
 
+  openGenereatePaper : (args) => ipcRenderer.invoke('openGenereatePaper',args), // Open New Course Window
+
   updateCourseWindow : (args) => ipcRenderer.invoke('updateCourseWindow',args), // Update Course Window
 
   updateCourse : (args) => ipcRenderer.invoke('updateCourse',args), // Update Course
@@ -36,9 +38,15 @@ contextBridge.exposeInMainWorld('api', {
 
   getCourseFromID : (args) => ipcRenderer.invoke('getCourseFromID',args),
 
+  getQuestions : (args) => ipcRenderer.invoke('getQuestions',args),
+
   setInstituteMetaData : (args) => ipcRenderer.invoke('setInstituteMetaData',args),
 
   showDialog : args => ipcRenderer.invoke('showDialog',args),
+
+  generateTex : args => ipcRenderer.invoke('generateTex',args),
+
+  getFile : args => ipcRenderer.invoke('getFile',args),
 
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send
 

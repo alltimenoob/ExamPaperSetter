@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain ,dialog } = require('electron'); // electron
 const isDev = require('electron-is-dev'); // To check if electron is in development mode
 const path = require('path');
 const fs = require('fs')
+const fsa = require('fs/promises')
 const sqlite= require('sqlite3');
 
 let mainWindow,CourseWindow;
@@ -352,6 +353,34 @@ ipcMain.handle("getUnits", (event,args)=>{
     })
 });
 
+ipcMain.handle("getQuestions", (event,args)=>{
+
+  const getUnitsQuery=`SELECT * FROM question WHERE course_id='${args}'`
+  const questions=[]
+
+  return new Promise((resolve,reject)=>{
+    
+    database.each(getUnitsQuery,
+      (error, row) => {
+          
+        if(error!=null)
+            reject({statusCode:0,errorMessage:error});
+
+            
+        questions.push({
+          "question_id":row.question_id,
+          "question_text":row.question_text,
+          "question_type_id":row.question_type_id,
+          "marks":row.marks,
+          "taxonomy_id":row.taxonomy_id,
+          "unit_id":row.unit_id,
+          "question_image":row.question_image
+        });
+        resolve({statusCode:1,questions:questions});
+        })
+    })
+});
+
 //Retrive course_outcomes of perticuler course
 ipcMain.handle("getCOs", (event,args)=>{
 
@@ -508,9 +537,136 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
         : `file://${path.join(__dirname, '../build/index.html')}`
     );
   })
+
+
+  ipcMain.handle("getFile",async (event,args)=>{
+    console.log(path.join(app.getAppPath(),"/output/exam_paper__.pdf"))
+    try {
+      const data = await fsa.readFile(path.join(app.getAppPath(),"/output/exam_paper__.pdf"),{encoding:"base64"});
+      return data
+    } catch (err) {
+      console.log(err);
+    }
+  })
+
+  ipcMain.handle("openGenereatePaper",(event,args)=>{
+
+    mainWindow.loadURL(
+      isDev
+        ? 'http://localhost:3000/GeneratePaper?course_id='+args 
+        : `file://${path.join(__dirname, '../build/index.html')}`
+    );
+  })
   
   ipcMain.handle("goBack",()=>{
     mainWindow.webContents.goBack()
   })
 
+  ipcMain.handle("generateTex", (event,args)=>{
+
+    const MetaData = args.MetaData
+
+    args = args.QuestionDetails
+
+    let questionsCode = "";
   
+    const headerCode=`
+  %college Heading
+  
+  \\textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)} \\\\
+  \\textbf{\\textit{(An Autonomous Institute)}} \\\\
+  \\textbf{${MetaData.Year} Year, ${MetaData.Stream}} \\\\
+  \\textbf{${MetaData.ExamType} ,${MetaData.Semester},AY ${MetaData.AY}} \\\\
+  \\vspace{4mm}
+  
+  
+  \\end{center}
+  \\end{large}
+  %Course code, title, maximum marks, date, time
+  \\begin{large}
+  \\textbf{Course Code:}  
+  \\hspace{20mm}
+  \\textbf{Course Title:}\\vspace{2mm}\\\\
+  \\textbf{Date:} 
+  \\parbox[t]{37mm}{${MetaData.Date}}
+  \\textbf{Time:}
+  \\parbox[t]{37mm}{${MetaData.Time}}
+  \\textbf{Maximum Marks: ${MetaData.TotalMarks}}
+  \\end{large} \\\\
+  \\rule{162mm}{0.3mm}
+  \\textbf{Instruction}
+  
+  %instruction section
+  
+  \\begin{itemize}
+      \\item Numbers in the square brackets to the right indicate maximum marks.
+      \\item Instruction 2
+      \\item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze,       E: Evaluate, C: Create
+  \\end{itemize}
+  \\rule{162mm}{0.3mm}
+  `    
+  
+  questionsCode+='\\begin{questions}\n';
+  questionsCode+='\\pointname{}\n';
+  questionsCode+='\\pointsinrightmargin\n';
+  questionsCode+='\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{2U}}}\n';
+  
+  
+  args.forEach(question => {
+    questionsCode+="\\question\n"
+      
+    if(question.showText){//It has sub questions
+  
+        questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
+  
+  
+        questionsCode+='\\begin{parts}\n'
+        question.subq.forEach(sub_q=>{
+            questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{1U}}}`
+            questionsCode+=`\\part[2] ${sub_q.label}\n`
+        });
+        questionsCode+='\\end{parts}\n'
+    }
+    else{ //It has no sub questions
+  
+        questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
+    }
+  });
+  
+  
+  questionsCode+='\\end{questions}\n'
+  const examPaperCode=`\\documentclass[addpoints]{exam}
+  \\usepackage[a4paper]{geometry}
+  \\usepackage{amsmath,stackengine}
+  \\begin{document}
+  \\begin{large}        
+  \\begin{center} `+
+  
+  headerCode +
+  
+  questionsCode +
+  
+  `\\end{document}`;
+  
+  fs.writeFileSync('./exam_paper__.tex',examPaperCode)
+
+  const { exec } = require('child_process');
+  
+  
+  exec('pdflatex --output-directory='+app.getAppPath()+'/output/ exam_paper__.tex', (err, stdout, stderr) => {
+    if (err) {
+      return;
+    }
+
+    console.log(`stdout: ${stdout}`);
+    console.log(`stderr: ${stderr}`);
+
+    mainWindow.loadURL(
+      isDev
+        ? 'http://localhost:3000/ShowPDF'
+        : `file://${path.join(__dirname, '../build/index.html')}`
+    );
+  });
+
+  
+  })

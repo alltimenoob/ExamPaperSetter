@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TitleBar from "./TitleBar";
 
+import {IoArrowBackCircleOutline} from "react-icons/io5"
 
 
 export default function Course()
@@ -20,13 +21,19 @@ export default function Course()
     return(
     <div className="App">
         <TitleBar name={Course.name} close={true} max={true} min={true} window="mainWindow"/>
+
+        <IoArrowBackCircleOutline className="mt-8 w-9 h-9 text-white ml-1 mr-1"
+            onClick={()=>{
+                window.api.goBack()
+            }} />
         <div className='mt-8 w-screen h-screen bg-white flex items-start'>
             <div className="grid gap-1 grid-flow-row grid-cols-1 m-5">
                 
                 <div className="w-[100px] h-[100px]  hover:opacity-75 cursor-pointer
                  bg-primary rounded flex items-center justify-center text-white"
-                 
-                 >
+                 onClick={()=>{
+                    window.api.openGenereatePaper(url.get("course_id"))
+                 }}>
                     <span className="text-lg text-center">New Exam Paper </span>
                 </div>
                 

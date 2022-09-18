@@ -7,6 +7,8 @@ import EditCourse from './components/EditCourse';
 import Course from './components/Course';
 import WelcomeTour from './components/WelcomeTour';
 import AddQuestion from './components/AddQuestion';
+import GeneratePaper from './components/GeneratePaper';
+import ShowPDF from './components/ShowPDF';
 
 function App() {
 
@@ -16,10 +18,12 @@ function App() {
       <Routes>
         <Route path='/WelcomeTour' element={<WelcomeTour/>} />
         <Route path="/AddQuestions" element={<AddQuestion />}/>
+        <Route path='/GeneratePaper' element={<GeneratePaper/>} />
         <Route path="/updateCourse" element={<EditCourse />}/>
         <Route  path='/' element={<OpenCourse/>}/>
         <Route path='/createCourse' element={<NewCourse />} />
         <Route path='/course' element={<Course />} />
+        <Route path='/ShowPDF' element={<ShowPDF />} />
       </Routes>
     </BrowserRouter>
   );
