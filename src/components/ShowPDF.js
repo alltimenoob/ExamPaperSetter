@@ -31,7 +31,7 @@ export default function ShowPDF(){
             
       {file && <div className="mt-8 flex items-center justify-center w-full h-full bg-white" >
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
-          <div  className="w-[800px] min-h-screen overflow-y-scroll">
+          <div  className="w-full min-h-screen overflow-y-scroll">
           <Viewer fileUrl={file} />;
           </div>
           

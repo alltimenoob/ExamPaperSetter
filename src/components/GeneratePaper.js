@@ -4,8 +4,7 @@ import { useEffect, useState } from "react"
 import {default as Select,components} from 'react-select'
 import {AiFillPlusCircle} from "react-icons/ai"
 
-export default function GeneratePaper(){
-
+export default function GeneratePaper(props){
 
     const CourseID = new URLSearchParams(window.location.search).get("course_id")
 
@@ -14,7 +13,7 @@ export default function GeneratePaper(){
     const [TaxonomyList,setTaxonomyList] = useState([{}])
     const [TypeList,setTypeList] = useState([{}])
     const [QuestionsList,setQuestionsList] = useState([{}])
-    const [Instructions,setInstructions] = useState([{}])
+    const [Instructions,setInstructions] = useState([{"value":"","id":0}])
 
     const [SelectByUnit,setSelectByUnit] = useState(false)
 
@@ -232,7 +231,13 @@ export default function GeneratePaper(){
                             
                                 onChange={(event)=>{
                                         let list = [...Instructions]
-                                        list[event.target.id] = {"value":event.target.value};
+                                        list = list.map((value)=>{
+                                            if(value.id == event.target.id)
+                                            {
+                                                value.value = event.currentTarget.value
+                                            }
+                                            return value
+                                        })
                                         setInstructions(list)
                                     }
                                 }
@@ -244,7 +249,7 @@ export default function GeneratePaper(){
 					<AiFillPlusCircle className="m-auto h-[28px] text-primary cursor-pointer" 
 					onClick={
 						()=>{
-							setInstructions([...Instructions,{"value":""}])
+							setInstructions([...Instructions,{"value":"",id:Instructions.length }])
 						}
 					}/>
                                 
@@ -270,7 +275,7 @@ export default function GeneratePaper(){
                                                     },
                                                     "showFilter":false,
                                                     "showText":true,
-                                                    "text":{"label":``,"value":-1},
+                                                    "text":{"label":``,"value":-1,"marks":0},
                                                     "subq":[]
                                                 })
                                             })
@@ -426,8 +431,10 @@ export default function GeneratePaper(){
                                                             setQDetails(temp.map((value,i2)=>{
                                                                 const ids = event.name.split(" ")
 
+                                                               
                                                                 if(parseInt(ids[0]) === i2)
                                                                 {
+                                                                    value.text.marks += text.marks
                                                                     const sq = [...value.subq]
                                                                     sq[parseInt(ids[1])] = text
                                                                     value.subq = sq
@@ -473,18 +480,25 @@ export default function GeneratePaper(){
 
                             <button className="Button mb-32" 
                             onClick={()=>{
-                                window.api.generateTex({
-                                    "MetaData":{
-                                        "TotalMarks":TotalMarks,
-                                        "Year":Year,
-                                        "Stream":Stream,
-                                        "AY":AY,
-                                        "ExamType":ExamType,
-                                        "Semester":Semester,
-                                        "Date" :Date,
-                                        "Time" :Time,
-                                    },                    
-                                    "QuestionDetails":QDetails           
+                                const Course = window.api.getCourseFromID(CourseID).then((value)=>{
+
+                                    window.api.generateTex({
+                                        "MetaData":{
+                                            "CourseCode" : value.code,
+                                            "CourseName" : value.name,
+                                            "TotalMarks":TotalMarks,
+                                            "Year":Year,
+                                            "Stream":Stream,
+                                            "AY":AY,
+                                            "ExamType":ExamType,
+                                            "Semester":Semester,
+                                            "Date" :Date,
+                                            "Time" :Time,
+                                            "Instructions":Instructions
+                                        },                    
+                                        "QuestionDetails":QDetails           
+                                    })
+
                                 })
                             }}>Generate</button>
                             

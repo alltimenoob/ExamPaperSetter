@@ -564,6 +564,7 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 
   ipcMain.handle("generateTex", (event,args)=>{
 
+
     const MetaData = args.MetaData
 
     args = args.QuestionDetails
@@ -584,9 +585,9 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   \\end{large}
   %Course code, title, maximum marks, date, time
   \\begin{large}
-  \\textbf{Course Code:}  
+  \\textbf{Course Code: ${MetaData.CourseCode}}  
   \\hspace{20mm}
-  \\textbf{Course Title:}\\vspace{2mm}\\\\
+  \\textbf{Course Title: ${MetaData.CourseName}}\\vspace{2mm}\\\\
   \\textbf{Date:} 
   \\parbox[t]{37mm}{${MetaData.Date}}
   \\textbf{Time:}
@@ -600,7 +601,9 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   
   \\begin{itemize}
       \\item Numbers in the square brackets to the right indicate maximum marks.
-      \\item Instruction 2
+      ${MetaData.Instructions.map((value)=>{
+        return ("\\item "+value.value)
+      })}
       \\item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze,       E: Evaluate, C: Create
   \\end{itemize}
   \\rule{162mm}{0.3mm}
@@ -609,11 +612,12 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   questionsCode+='\\begin{questions}\n';
   questionsCode+='\\pointname{}\n';
   questionsCode+='\\pointsinrightmargin\n';
-  questionsCode+='\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{2U}}}\n';
+  questionsCode+='\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}\n';
   
   
   args.forEach(question => {
-    questionsCode+="\\question\n"
+    
+    questionsCode+=`\\question[${question.text.marks}]\n`
       
     if(question.showText){//It has sub questions
   
@@ -622,8 +626,7 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   
         questionsCode+='\\begin{parts}\n'
         question.subq.forEach(sub_q=>{
-            questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{1U}}}`
-            questionsCode+=`\\part[2] ${sub_q.label}\n`
+            questionsCode+=`\\part ${sub_q.label}\n`
         });
         questionsCode+='\\end{parts}\n'
     }
@@ -670,3 +673,166 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 
   
   })
+
+
+  ipcMain.handle('insertQuestion',(event,args)=>{
+    // console.log(args);
+  
+    const insertQuestionQuery="INSERT INTO question(question_text,question_type_id,marks,course_id,taxonomy_id,unit_id,question_image) VALUES (?,?,?,?,?,?,?)";
+      let status;
+     
+    new Promise((resolve,reject)=>
+    {
+      database.run(insertQuestionQuery,[args.question_text,args.question_type_id,args.marks,args.course_id,args.taxonomy_id,args.unit_id,args.question_image],function (error){
+        if(error)
+        {
+          return reject(-1);
+        }
+  
+        return resolve(this.lastID);
+      }
+        )
+      }).then((result) => {
+        const question_id=result;
+     
+      //Insert into course_outcome_question_table
+      const courseOutcomesList=args.cource_outcome_ids;
+      const insertCOQuestionQuery="INSERT INTO course_outcomes_question(question_id,course_outcomes_id) VALUES(?,?)"
+      courseOutcomesList.forEach(co=>{
+        database.run(insertCOQuestionQuery,[question_id,co],(error)=>{
+          if(error!=null){
+            console.log(error)
+          }
+          status=true
+        })
+      });
+   
+      //insert options of question into database
+      if(args.isMCQ)
+      {
+        const options=args.options;
+        const insertOptionQuery="INSERT INTO mcq_option(question_id,option_text) VALUES(?,?)"
+        options.forEach(option=>{
+          database.run(insertOptionQuery,[question_id,option],(error)=>{
+            if(error!=null){
+              console.log(error)
+            }
+            status=true
+          })
+        });
+      }
+    }
+  );
+   
+   return status;
+  })
+  
+  function getQuestionTypeById(id){
+    let q_type;
+    const getQuestionTypeQuery='SELECT * FROM question_type where question_type_id=?';
+    new Promise(
+      (resolve,reject)=>{
+        database.each(
+          getQuestionTypeQuery,
+          [id],
+          function(error,row){
+          if(error){
+            reject({statusCode:0,error:error})
+          }
+          resolve({
+            'statusCode':1,
+            'question_type_id':row.question_type_id,
+            'question_type_name':row.question_type_name,
+          })
+        });
+      }
+    ).then(
+      (result)=>{
+        q_type=result;
+      }
+    );
+      return  q_type;
+  }
+  
+  function getTaxonomyById(id){
+    let taxonomy;
+    const getTaxonomyQuery='SELECT * FROM taxonomy where taxonomy_id=?';
+    new Promise(
+      (resolve,reject)=>{
+        database.each(
+          getTaxonomyQuery,
+          [id],
+          function(error,row){
+            if(error){
+              reject({statusCode:0,error:error})
+            }
+            resolve({
+              'statusCode':1,
+              'taxonomy_id':row.taxonomy_id,
+              'taxonomy_letter':row.taxonomy_letter,
+              'taxonomy_name':row.taxonomy_name,
+            })
+        });
+      }
+    ).then(
+      (result)=>{
+        taxonomy=result;
+      }
+    );
+      return  taxonomy;
+  }
+  
+  function getCourseOutcomeById(id){
+  
+    const getCoQuery='SELECT * FROM course_outcomes where course_outcomes_id=?';
+    new Promise(
+      (resolve,reject)=>{
+  
+        database.each(
+          getCoQuery,
+          [id],
+          function(error,row){
+            if(error){
+              reject({'statusCode':0,'error':error})
+            }
+  
+            resolve({
+              'course_outcomes_id':row.course_outcomes_id,
+              'course_outcomes_number':row.course_outcomes_number,
+              'course_outcomes_description':row.course_outcomes_description,
+              'course_id':row.course_id,
+            })
+          }
+        );
+      }
+    ).then();
+  }
+  
+  function getUnitById(id){
+    let unit;
+    const getUnitQuery='SELECT * FROM unit where unit_id=?';
+    new Promise(
+      (resolve,reject)=>{
+        database.each(
+          getUnitQuery,
+          [id],
+          function(error,row){
+            if(error){
+              reject({statusCode:0,error:error})
+            }
+            resolve({
+              'statusCode':1,
+              'unit_id':row.unit_id,
+              'unit_name':row.unit_name,
+              'unit_description':row.unit_description,
+              'course_id':row.course_id
+            })
+        });
+      }
+    ).then(
+      (result)=>{
+        unit=result;
+      }
+    );
+      return  unit
+}

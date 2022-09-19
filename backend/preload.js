@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld('api', {
 
   getQuestions : (args) => ipcRenderer.invoke('getQuestions',args),
 
+  insertQuestion : (args) => ipcRenderer.invoke('insertQuestion',args),
+
   setInstituteMetaData : (args) => ipcRenderer.invoke('setInstituteMetaData',args),
 
   showDialog : args => ipcRenderer.invoke('showDialog',args),

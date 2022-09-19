@@ -247,8 +247,8 @@ export default function AddQuestion(){
                                 "question_image" : SelectedImage
                             }
 
-                            console.log(args)
-                            //window.api.insertQuestion(args)
+                            
+                            window.api.insertQuestion(args)
                             
                             toast("Question Added Successfully")
 
@@ -256,11 +256,11 @@ export default function AddQuestion(){
                         <BiReset className="text-primary h-[30px] w-auto mt-5 flex-5 cursor-pointer" onClick={()=>{
                             setSelectedType("Short")
                             setOptions([{"value":""}])
-                            setQuestion(null)
-                            setTaxonomy(null)
-                            setSelectedCOList(null)
-                            setSelectedUnit(null)
-                            setShowImage(null)
+                            setQuestion("")
+                            setTaxonomy("")
+                            setSelectedCOList("")
+                            setSelectedUnit("")
+                            setShowImage("")
                         }}/>
                     </div>
                     
