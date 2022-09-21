@@ -72,8 +72,8 @@ input[type=number] {
 
 @layer components{
   .TitleBar{
-    @apply absolute top-0 h-8 min-w-full font-normal text-base flex items-center justify-between
-      pl-2 z-10 text-white
+    @apply absolute overflow-auto top-0 max-h-[32px] min-h-[32px] min-w-full font-normal text-base flex items-center justify-between
+      pl-2 z-20 text-white
   }
   
   .TitleBarIcons{

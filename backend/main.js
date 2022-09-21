@@ -137,6 +137,36 @@ ipcMain.handle("showDialog",(event,args)=>{
   dialog.showMessageBox(win, args.options);
 })
   
+ipcMain.handle("saveFile",async (event,args)=>{
+  let options = {
+
+    title: "Save files",
+    
+    defaultPath : app.getPath("downloads"),
+    
+    buttonLabel : "Save Output File",
+
+    properties: ['openDirectory']
+  
+   }
+
+   let filename = await dialog.showOpenDialog(mainWindow, options)
+   if(!filename.canceled)
+   {
+    var base64Data = args.replace(/^data:application\/pdf;base64,/, "");
+
+    fs.writeFileSync(path.join(filename.filePaths[0],"/output.pdf"),base64Data,"base64")
+
+    fs.copyFile("exam_paper__.tex", path.join(filename.filePaths[0],"/output.tex"), (err) => {
+      if (err) {
+        console.log("Error Found:", err);
+      }
+      else {
+        console.log("\nFile Contents of copied_file::")
+      }
+    });
+   }
+})
 
 // Function To Close Window
 ipcMain.handle("close",(event,args)=>{
@@ -353,7 +383,7 @@ ipcMain.handle("getUnits", (event,args)=>{
     })
 });
 
-ipcMain.handle("getQuestions", (event,args)=>{
+ipcMain.handle("s", (event,args)=>{
 
   const getUnitsQuery=`SELECT * FROM question WHERE course_id='${args}'`
   const questions=[]
@@ -623,7 +653,6 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   
         questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
   
-  
         questionsCode+='\\begin{parts}\n'
         question.subq.forEach(sub_q=>{
             questionsCode+=`\\part ${sub_q.label}\n`
@@ -635,7 +664,6 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
         questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
     }
   });
-  
   
   questionsCode+='\\end{questions}\n'
   const examPaperCode=`\\documentclass[addpoints]{exam}
@@ -655,15 +683,15 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 
   const { exec } = require('child_process');
   
-  
-  exec('pdflatex --output-directory='+app.getAppPath()+'/output/ exam_paper__.tex', (err, stdout, stderr) => {
+  exec('pdflatex --output-directory='+path.join(app.getAppPath(),'/output/')+' exam_paper__.tex', (err, stdout, stderr) => {
     if (err) {
+      console.log(err)
       return;
     }
 
     console.log(`stdout: ${stdout}`);
     console.log(`stderr: ${stderr}`);
-
+    
     mainWindow.loadURL(
       isDev
         ? 'http://localhost:3000/ShowPDF'
@@ -723,116 +751,47 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
       }
     }
   );
-   
-   return status;
+  
+})
+
+
+ipcMain.handle('getQuestions',(events,args)=>{
+
+  const CourseID = args.course_id
+
+  let sql = `SELECT * FROM question INNER JOIN taxonomy ON taxonomy.taxonomy_id = question.taxonomy_id INNER JOIN unit 
+  ON unit.unit_id = question.unit_id AND question.course_id = `+CourseID
+  
+  return new Promise((resolve,reject)=>{
+    
+    database.all(sql,async (error,rows)=>{
+
+      if(error) reject(error)
+  
+      const Questions = await Promise.all(rows.map(async (row)=>{
+        
+        sql = `SELECT course_outcomes_question.course_outcomes_id,course_outcomes.course_outcomes_description FROM course_outcomes_question INNER JOIN course_outcomes 
+        ON course_outcomes_question.course_outcomes_id = course_outcomes.course_outcomes_id AND course_outcomes_question.question_id = `+row.question_id
+          
+        const CourseOutcomes = new Promise((resolve,reject)=>{
+          database.all(sql,(error,rows)=>{
+            if(error) reject(error)
+            resolve(rows)
+          })
+        })
+
+        await Promise.all([CourseOutcomes]).then((values)=>{
+          row.cource_outcomes = values[0]
+          
+        })
+
+        return row
+
+      }))
+
+      resolve(Questions)
+
+    })
   })
   
-  function getQuestionTypeById(id){
-    let q_type;
-    const getQuestionTypeQuery='SELECT * FROM question_type where question_type_id=?';
-    new Promise(
-      (resolve,reject)=>{
-        database.each(
-          getQuestionTypeQuery,
-          [id],
-          function(error,row){
-          if(error){
-            reject({statusCode:0,error:error})
-          }
-          resolve({
-            'statusCode':1,
-            'question_type_id':row.question_type_id,
-            'question_type_name':row.question_type_name,
-          })
-        });
-      }
-    ).then(
-      (result)=>{
-        q_type=result;
-      }
-    );
-      return  q_type;
-  }
-  
-  function getTaxonomyById(id){
-    let taxonomy;
-    const getTaxonomyQuery='SELECT * FROM taxonomy where taxonomy_id=?';
-    new Promise(
-      (resolve,reject)=>{
-        database.each(
-          getTaxonomyQuery,
-          [id],
-          function(error,row){
-            if(error){
-              reject({statusCode:0,error:error})
-            }
-            resolve({
-              'statusCode':1,
-              'taxonomy_id':row.taxonomy_id,
-              'taxonomy_letter':row.taxonomy_letter,
-              'taxonomy_name':row.taxonomy_name,
-            })
-        });
-      }
-    ).then(
-      (result)=>{
-        taxonomy=result;
-      }
-    );
-      return  taxonomy;
-  }
-  
-  function getCourseOutcomeById(id){
-  
-    const getCoQuery='SELECT * FROM course_outcomes where course_outcomes_id=?';
-    new Promise(
-      (resolve,reject)=>{
-  
-        database.each(
-          getCoQuery,
-          [id],
-          function(error,row){
-            if(error){
-              reject({'statusCode':0,'error':error})
-            }
-  
-            resolve({
-              'course_outcomes_id':row.course_outcomes_id,
-              'course_outcomes_number':row.course_outcomes_number,
-              'course_outcomes_description':row.course_outcomes_description,
-              'course_id':row.course_id,
-            })
-          }
-        );
-      }
-    ).then();
-  }
-  
-  function getUnitById(id){
-    let unit;
-    const getUnitQuery='SELECT * FROM unit where unit_id=?';
-    new Promise(
-      (resolve,reject)=>{
-        database.each(
-          getUnitQuery,
-          [id],
-          function(error,row){
-            if(error){
-              reject({statusCode:0,error:error})
-            }
-            resolve({
-              'statusCode':1,
-              'unit_id':row.unit_id,
-              'unit_name':row.unit_name,
-              'unit_description':row.unit_description,
-              'course_id':row.course_id
-            })
-        });
-      }
-    ).then(
-      (result)=>{
-        unit=result;
-      }
-    );
-      return  unit
-}
+})

@@ -4,6 +4,7 @@
   background: rgb(0,114,255);
   background: linear-gradient(143deg, #4e6d87 33%, #a3f0ff 92%); 
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   font-size: calc(10px + 2vmin);
   color: black;

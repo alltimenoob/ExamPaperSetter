@@ -43,9 +43,10 @@ export default function AddQuestion(){
                 }
             }))
             setCourseOutcomeList(values[1].cos.map((value)=>{
+               
                 return {
                     "label" : "CO : "+value.course_outcomes_description,
-                    "value" : value.course_outcomes_number
+                    "value" : value.course_outcomes_id
                 }
             }))
             setTaxonomyList(values[2].taxonomy)
@@ -246,7 +247,7 @@ export default function AddQuestion(){
                                 "cource_outcome_ids": SelectedCOList.map(value => { return value.value }),
                                 "question_image" : SelectedImage
                             }
-
+                            console.log(args)
                             
                             window.api.insertQuestion(args)
                             

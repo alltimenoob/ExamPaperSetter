@@ -1,45 +1,64 @@
-\documentclass[addpoints]{exam}
+\documentclass[addpoints,12pt]{exam}
   \usepackage[a4paper]{geometry}
+  \usepackage{enumitem}
   \usepackage{amsmath,stackengine}
+  \geometry{
+ 	a4paper,
+ 	total={150mm,257mm},
+ 	left=25mm,
+ 	top=20mm,
+  }
+  
   \begin{document}
-  \begin{large}        
+  
+  \hspace{-7mm}ID No.\rule{20mm}{0.3mm}
+  
   \begin{center} 
-  %college Heading
+	%college Heading
   
   \textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)} \\
   \textbf{\textit{(An Autonomous Institute)}} \\
-  \textbf{ Year, } \\
-  \textbf{ ,,AY } \\
+  \textbf{First Year, B.Tech} \\
+  \textbf{1st Mid Semester Examination ,Odd,AY AY 2022-23} \\
   \vspace{4mm}
   
   
   \end{center}
-  \end{large}
-  %Course code, title, maximum marks, date, time
-  \begin{large}
-  \textbf{Course Code: SCP01}  
-  \hspace{20mm}
-  \textbf{Course Title: sample course}\vspace{2mm}\\
-  \textbf{Date:} 
-  \parbox[t]{37mm}{}
-  \textbf{Time:}
-  \parbox[t]{37mm}{}
-  \textbf{Maximum Marks: }
-  \end{large} \\
-  \rule{162mm}{0.3mm}
-  \textbf{Instruction}
   
-  %instruction section
+	%Course code, title, maximum marks, date, time
+  \hspace{-7mm}
+  \parbox[t]{50mm}{\textbf{Course Code: 3CP02}}
+  \parbox[t]{100mm}{\textbf{Course Title: General Knowledge}}\vspace{2mm}\\
+  \parbox[t]{50mm}{\textbf{Date: 20.09.21}}
+  \parbox[t]{75mm}{\textbf{Time : 00:00 AM to 01:00 AM}}
+  \parbox[t]{50mm}{\textbf{Maximum Marks: 30}}\\
+  \hline \vspace{2mm} 
+  \hspace{-6mm}\textbf{Instruction}
+
   
-  \begin{itemize}
+	%instruction section
+	
+  \begin{itemize}[leftmargin=4mm,rightmargin=-2cm]
       \item Numbers in the square brackets to the right indicate maximum marks.
-      \item 
-      \item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze,       E: Evaluate, C: Create
+      \item Instruction Demo
+      \item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze, E: Evaluate, C: Create
   \end{itemize}
-  \rule{162mm}{0.3mm}
+  \hline
+  \vspace{5mm}
+	%Questions section  
+  
   \begin{questions}
 \pointname{}
 \pointsinrightmargin
 \pointformat{\parbox[t]{16pt}{\text{[\thepoints]}}}
+\question[20]
+\vspace{-\baselineskip}\vspace{1.5mm}Answer The Following Question
+\begin{parts}
+\part what is nfa?
+\part what is nfa explain?
+\part why is dfa used?
+\end{parts}
+
 \end{questions}
+
 \end{document}

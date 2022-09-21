@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld('api', {
 
   generateTex : args => ipcRenderer.invoke('generateTex',args),
 
+  saveFile : args => ipcRenderer.invoke('saveFile',args),
+
   getFile : args => ipcRenderer.invoke('getFile',args),
 
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send
