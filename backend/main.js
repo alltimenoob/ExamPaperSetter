@@ -779,6 +779,7 @@ ipcMain.handle('getQuestions',(events,args)=>{
         
         sql = `SELECT course_outcomes_question.course_outcomes_id,course_outcomes.course_outcomes_description FROM course_outcomes_question INNER JOIN course_outcomes 
         ON course_outcomes_question.course_outcomes_id = course_outcomes.course_outcomes_id AND course_outcomes_question.question_id = `+row.question_id
+
           
         const CourseOutcomes = new Promise((resolve,reject)=>{
           database.all(sql,(error,rows)=>{
@@ -787,9 +788,18 @@ ipcMain.handle('getQuestions',(events,args)=>{
           })
         })
 
-        await Promise.all([CourseOutcomes]).then((values)=>{
+        sql = `SELECT * FROM mcq_option where question_id = `+row.question_id
+
+        const MCQOptions = new Promise((resolve,reject)=>{
+          database.all(sql,(error,rows)=>{
+            if(error) reject(error)
+            resolve(rows)
+          })
+        })
+
+        await Promise.all([CourseOutcomes,MCQOptions]).then((values)=>{
           row.cource_outcomes = values[0]
-          
+          row.options = values[1]
         })
 
         return row
