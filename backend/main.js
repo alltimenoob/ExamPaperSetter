@@ -646,28 +646,38 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   args.forEach(question => {
    
     questionsCode+=`\\question[${question.text.marks}]\n`
-     
+    
+ 
+
     if(question.showText){//It has sub questions
  
-        questionsCode+=`\\vspace{3mm}${question.text.label}\n`
- 
-        questionsCode+='\\begin{parts}\n'
+        questionsCode+=`${question.text.label}\n`
+
+	    questionsCode+=`\\vspace{1.5mm}\n\\begin{parts}\n`
         question.subq.forEach(sub_q=>{
-            questionsCode+=`\\part ${sub_q.label}\\\\\n`
-            if(sub_q.mcqs.length > 0)
+            questionsCode+=`\\part ${sub_q.label}\n\n`
+            if(sub_q.question_type_name == "MCQ" )
             {
-              questionsCode+=`\\begin{oneparchoices}\n`
+              questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
               sub_q.mcqs.forEach((option)=>{
                 questionsCode+=`\\choice ${option.option_text}\n`
               })
-              questionsCode+=`\\end{oneparchoices}\n`
+              questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
             }
         });
         questionsCode+='\\end{parts}\n'
     }
     else{ //It has no sub questions
  
-        questionsCode+=`\\vspace{3mm}${question.text.label}\n`
+        questionsCode+=`\\vspace{1.5mm}${question.text.label}\n\n`
+		if(question.text.question_type_name == "MCQ" )
+		{
+			questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
+			question.text.mcqs.forEach((option)=>{
+			 questionsCode+=`\\choice ${option.option_text}\n`
+			})
+			questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
+		}
     }
 
   });
@@ -776,7 +786,7 @@ ipcMain.handle('getQuestions',(events,args)=>{
   const CourseID = args.course_id
 
   let sql = `SELECT * FROM question INNER JOIN taxonomy ON taxonomy.taxonomy_id = question.taxonomy_id INNER JOIN unit 
-  ON unit.unit_id = question.unit_id AND question.course_id = `+CourseID
+  ON unit.unit_id = question.unit_id AND question.course_id = ${CourseID} INNER JOIN question_type ON question.question_type_id = question_type.question_type_id`
   
   return new Promise((resolve,reject)=>{
     
@@ -786,7 +796,7 @@ ipcMain.handle('getQuestions',(events,args)=>{
   
       const Questions = await Promise.all(rows.map(async (row)=>{
         
-        sql = `SELECT course_outcomes_question.course_outcomes_id,course_outcomes.course_outcomes_description FROM course_outcomes_question INNER JOIN course_outcomes 
+        sql = `SELECT course_outcomes_question.course_outcomes_id,course_outcomes.course_outcomes_description,course_outcomes.course_outcomes_number FROM course_outcomes_question INNER JOIN course_outcomes 
         ON course_outcomes_question.course_outcomes_id = course_outcomes.course_outcomes_id AND course_outcomes_question.question_id = `+row.question_id
 
           
