@@ -653,7 +653,15 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
  
         questionsCode+='\\begin{parts}\n'
         question.subq.forEach(sub_q=>{
-            questionsCode+=`\\part ${sub_q.label}\n`
+            questionsCode+=`\\part ${sub_q.label}\\\\\n`
+            if(sub_q.mcqs.length > 0)
+            {
+              questionsCode+=`\\begin{oneparchoices}\n`
+              sub_q.mcqs.forEach((option)=>{
+                questionsCode+=`\\choice ${option.option_text}\n`
+              })
+              questionsCode+=`\\end{oneparchoices}\n`
+            }
         });
         questionsCode+='\\end{parts}\n'
     }
@@ -661,6 +669,7 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
  
         questionsCode+=`\\vspace{3mm}${question.text.label}\n`
     }
+
   });
  
   questionsCode+='\\end{questions}\n'
@@ -799,7 +808,7 @@ ipcMain.handle('getQuestions',(events,args)=>{
 
         await Promise.all([CourseOutcomes,MCQOptions]).then((values)=>{
           row.cource_outcomes = values[0]
-          row.options = values[1]
+          row.mcqs = values[1]
         })
 
         return row

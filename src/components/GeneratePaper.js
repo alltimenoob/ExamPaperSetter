@@ -96,13 +96,12 @@ export default function GeneratePaper(){
      
         questions.then((result)=>{
 
-            console.log(result)
             setQuestionsList(result.map((value)=>{
                 value.value = value.question_id
                 value.label = value.question_text
                 delete value.question_id
                 delete value.question_text
-
+                
                
                 return value
             }))
