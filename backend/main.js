@@ -602,57 +602,55 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
     let questionsCode = "";
   
     const headerCode=`
-  %college Heading
-  
-  \\textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)} \\\\
+    \\hspace{-7mm}ID No.\\rule{20mm}{0.3mm}
+    \\begin{center}
+ \\textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)} \\\\
   \\textbf{\\textit{(An Autonomous Institute)}} \\\\
   \\textbf{${MetaData.Year} Year, ${MetaData.Stream}} \\\\
   \\textbf{${MetaData.ExamType} ,${MetaData.Semester},AY ${MetaData.AY}} \\\\
   \\vspace{4mm}
-  
-  
+ 
+ 
   \\end{center}
-  \\end{large}
-  %Course code, title, maximum marks, date, time
-  \\begin{large}
-  \\textbf{Course Code: ${MetaData.CourseCode}}  
-  \\hspace{20mm}
-  \\textbf{Course Title: ${MetaData.CourseName}}\\vspace{2mm}\\\\
-  \\textbf{Date:} 
-  \\parbox[t]{37mm}{${MetaData.Date}}
-  \\textbf{Time:}
-  \\parbox[t]{37mm}{${MetaData.Time}}
-  \\textbf{Maximum Marks: ${MetaData.TotalMarks}}
-  \\end{large} \\\\
-  \\rule{162mm}{0.3mm}
-  \\textbf{Instruction}
-  
-  %instruction section
-  
-  \\begin{itemize}
+ 
+%Course code, title, maximum marks, date, time
+  \\hspace{-7mm}
+  \\parbox[t]{50mm}{\\textbf{Course Code: ${MetaData.CourseCode}}}
+  \\parbox[t]{100mm}{\\textbf{Course Title: ${MetaData.CourseName}}}\\vspace{2mm}\\\\
+  \\parbox[t]{50mm}{\\textbf{Date: ${MetaData.Date}}}
+  \\parbox[t]{75mm}{\\textbf{Time : ${MetaData.Time}}}
+  \\parbox[t]{50mm}{\\textbf{Maximum Marks: ${MetaData.TotalMarks}}}\\\\
+  \\line(1,0){170mm} \\vspace{2mm}
+  \\hspace{-6mm}\\textbf{Instruction}
+
+ 
+%instruction section
+
+  \\begin{itemize}[leftmargin=4mm,rightmargin=-2cm]
       \\item Numbers in the square brackets to the right indicate maximum marks.
-      ${MetaData.Instructions.map((value)=>{
+     ${MetaData.Instructions.map((value)=>{
         return ("\\item "+value.value)
       })}
-      \\item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze,       E: Evaluate, C: Create
+      \\item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze, E: Evaluate, C: Create
   \\end{itemize}
-  \\rule{162mm}{0.3mm}
-  `    
-  
+  \\line(1,0){170mm}
+ \\vspace{5mm}\n`
+ 
+ 
   questionsCode+='\\begin{questions}\n';
   questionsCode+='\\pointname{}\n';
   questionsCode+='\\pointsinrightmargin\n';
   questionsCode+='\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}\n';
-  
-  
+ 
+ 
   args.forEach(question => {
-    
+   
     questionsCode+=`\\question[${question.text.marks}]\n`
-      
+     
     if(question.showText){//It has sub questions
-  
-        questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
-  
+ 
+        questionsCode+=`\\vspace{3mm}${question.text.label}\n`
+ 
         questionsCode+='\\begin{parts}\n'
         question.subq.forEach(sub_q=>{
             questionsCode+=`\\part ${sub_q.label}\n`
@@ -660,23 +658,32 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
         questionsCode+='\\end{parts}\n'
     }
     else{ //It has no sub questions
-  
-        questionsCode+=`\\vspace{-\\baselineskip}\\vspace{1.5mm}${question.text.label}\n`
+ 
+        questionsCode+=`\\vspace{3mm}${question.text.label}\n`
     }
   });
-  
+ 
   questionsCode+='\\end{questions}\n'
-  const examPaperCode=`\\documentclass[addpoints]{exam}
+
+  const examPaperCode=`\\documentclass[addpoints,12pt]{exam}
   \\usepackage[a4paper]{geometry}
+  \\usepackage{enumitem}
   \\usepackage{amsmath,stackengine}
-  \\begin{document}
-  \\begin{large}        
-  \\begin{center} `+
-  
+  \\geometry{
+  a4paper,
+  total={150mm,257mm},
+  left=25mm,
+  top=20mm,
+  } 
+    
+
+ 
+  \\begin{document}`+
+ 
   headerCode +
-  
+ 
   questionsCode +
-  
+ 
   `\\end{document}`;
   
   fs.writeFileSync('./exam_paper__.tex',examPaperCode)

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2022.7.24)  21 SEP 2022 12:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2022.7.24)  21 SEP 2022 12:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -239,131 +239,31 @@ LaTeX Info: Redefining \addtolength on input line 81.
 \@centerbox=\box59
 \c@ROWcellindex@=\count324
 )
-(/usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
-File: l3backend-pdftex.def 2022-04-14 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count325
-\l__pdf_internal_box=\box60
-)
-(/home/mihir/Best/ExamPaperSetter/output//exam_paper__.aux)
-\openout1 = `exam_paper__.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
-LaTeX Font Info:    ... okay on input line 14.
+! LaTeX Error: Missing \begin{document}.
 
-*geometry* driver: auto-detecting
-*geometry* detected driver: pdftex
-*geometry* verbose mode - [ preamble ] result:
-* driver: pdftex
-* paper: a4paper
-* layout: <same size as paper>
-* layoutoffset:(h,v)=(0.0pt,0.0pt)
-* modes: 
-* h-part:(L,W,R)=(71.13188pt, 426.79134pt, 99.58466pt)
-* v-part:(T,H,B)=(56.9055pt, 731.23582pt, 56.90552pt)
-* \paperwidth=597.50787pt
-* \paperheight=845.04684pt
-* \textwidth=426.79134pt
-* \textheight=731.23582pt
-* \oddsidemargin=-1.1381pt
-* \evensidemargin=-1.1381pt
-* \topmargin=-45.36449pt
-* \headheight=15.0pt
-* \headsep=15.0pt
-* \topskip=12.0pt
-* \footskip=29.0pt
-* \marginparwidth=36.135pt
-* \marginparsep=5.0pt
-* \columnsep=10.0pt
-* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
-* \hoffset=0.0pt
-* \voffset=0.0pt
-* \mag=1000
-* \@twocolumnfalse
-* \@twosidefalse
-* \@mparswitchfalse
-* \@reversemarginfalse
-* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.13   \hspace{-7mm}
+                    ID No.\rule{20mm}{0.3mm}
+? 
+! Emergency stop.
+ ...                                              
+                                                  
+l.13   \hspace{-7mm}
+                    ID No.\rule{20mm}{0.3mm}
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
 
-
-Overfull \hbox (2.93007pt too wide) in paragraph at lines 27--35
-[]  [] [] 
- []
-
-
-Overfull \hbox (76.35405pt too wide) in paragraph at lines 27--35
-[] [] [] 
- []
-
-
-Overfull \hbox (56.9055pt too wide) in paragraph at lines 27--35
-|
- []
-
-
-Overfull \hbox (56.9055pt too wide) in paragraph at lines 44--46
-| 
- []
-
-
-Overfull \hbox (2.27759pt too wide) in paragraph at lines 50--50
-[][] 
- []
-
-
-Overfull \hbox (2.27759pt too wide) in paragraph at lines 56--56
-[][] 
- []
-
-
-Overfull \hbox (2.27759pt too wide) in paragraph at lines 63--63
-[][] 
- []
-
-[1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-This exam contains 4 questions with 9 parts, 0 subparts, and 0 subsubparts.
-This exam has a total of 50 points.
-This exam has a total of 0 bonus points.
-
-Class exam Warning: Point totals have changed. Rerun to get point totals right.
-
-
-(/home/mihir/Best/ExamPaperSetter/output//exam_paper__.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+ 
 Here is how much of TeX's memory you used:
- 3939 strings out of 478238
- 60208 string characters out of 5850456
- 386979 words of memory out of 5000000
- 22194 multiletter control sequences out of 15000+600000
- 470560 words of font info for 32 fonts, out of 8000000 for 9000
+ 3674 strings out of 478238
+ 53719 string characters out of 5850456
+ 366194 words of memory out of 5000000
+ 21942 multiletter control sequences out of 15000+600000
+ 469557 words of font info for 29 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,62p,368b,228s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/share/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sf
-rm1200.pfb>
-Output written on /home/mihir/Best/ExamPaperSetter/output//exam_paper__.pdf (1 
-page, 57217 bytes).
-PDF statistics:
- 29 PDF objects out of 1000 (max. 8388607)
- 17 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
-
+ 55i,0n,62p,242b,36s stack positions out of 5000i,500n,10000p,200000b,80000s
+!  ==> Fatal error occurred, no output PDF file produced!
