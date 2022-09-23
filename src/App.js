@@ -14,13 +14,13 @@ function App() {
 
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/">
       <Routes>
         <Route path='/WelcomeTour' element={<WelcomeTour/>} />
         <Route path="/AddQuestions" element={<AddQuestion />}/>
         <Route path='/GeneratePaper' element={<GeneratePaper/>} />
         <Route path="/updateCourse" element={<EditCourse />}/>
-        <Route  path='/' element={<OpenCourse/>}/>
+        <Route path='/' element={<OpenCourse/>}/>
         <Route path='/createCourse' element={<NewCourse />} />
         <Route path='/course' element={<Course />} />
         <Route path='/ShowPDF' element={<ShowPDF />} />

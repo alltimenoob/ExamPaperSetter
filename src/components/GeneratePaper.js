@@ -3,6 +3,7 @@ import { IoArrowBackCircleOutline } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { default as Select, components } from "react-select";
 import { AiFillPlusCircle } from "react-icons/ai";
+import {GoSettings} from "react-icons/go"
 import { IoIosPaper } from "react-icons/io";
 
 export default function GeneratePaper() {
@@ -46,6 +47,8 @@ export default function GeneratePaper() {
 
   const [SelectedCOList, setSelectedCOList] = useState([]);
   const [SelectedUnitList, setSelectedUnitList] = useState([]);
+
+  const [CurrentMarks,setCurrentMarks] = useState(0)
 
   const [TotalMarks, setTotalMarks] = useState("");
   const [Year, setYear] = useState("");
@@ -103,10 +106,12 @@ export default function GeneratePaper() {
       );
     });
 
+    
+
     const questions = window.api.getQuestions({ course_id: CourseID });
 
     questions.then((result) => {
-      console.log(result);
+
       setQuestionsList(
         result.map((value) => {
           value.value = value.question_id;
@@ -169,12 +174,20 @@ export default function GeneratePaper() {
       />
 
       <IoArrowBackCircleOutline
-        className="absolute left-0  mt-8 w-9 h-9 text-white ml-1 mr-1 overflow-auto"
+        className="absolute left-0 top-8 w-9 h-9 text-white  overflow-auto"
         onClick={() => {
           if (Page === "Questions") setPage("MetaData");
           else window.api.goBack();
         }}
       />
+
+    {Page==="Questions" && <GoSettings
+        className="absolute left-0 top-24 p-[3px] w-9 h-9 text-white overflow-auto"
+        onClick={() => {
+          
+        }}
+      />}
+
 
       <div className="absolute mt-8 p-5 left-10 right-0 w-90 h-screen overflow-y-scroll bg-white flex flex-col items-start">
         {Page === "MetaData" && (
@@ -363,38 +376,9 @@ export default function GeneratePaper() {
 
         {Page === "Questions" && (
           <div className="w-full h-screen  ">
-            <div>
-              <input
-                id="selectbyunit"
-                type="checkbox"
-                onChange={() => {
-                  setSelectByUnit(!SelectByUnit);
-                }}
-              />
-              <label htmlFor="selectbyunit" className="text-xl ">
-                {" "}
-                Select By Unit ?
-              </label>
-            </div>
-
-            <div className="mt-5 w-full flex flex-col gap-2">
-              {!SelectByUnit && (
-                <span className="w-full p-0 text-[16px] text-start border-b-2 border-b-primary">
-                  <Select
-                    placeholder={"Select COs"}
-                    options={CourseOutcomeList}
-                    isMulti
-                    closeMenuOnSelect={false}
-                    hideSelectedOptions={false}
-                    onChange={(list) => {
-                      setSelectedCOList(list);
-                      setSelectedUnitList([]);
-                    }}
-                    allowSelectAll={true}
-                    value={SelectedCOList}
-                  />
-                </span>
-              )}
+            
+            <div className="mt-2 w-full flex flex-col gap-2">
+              
 
               {SelectByUnit && (
                 <span className="w-full p-0 text-[16px] text-start border-b-2 border-b-primary">
@@ -415,9 +399,11 @@ export default function GeneratePaper() {
               )}
             </div>
 
-            <span className="mt-5 self-start text-xl"> Questions </span>
-
-            <div className="mt-8 w-full h-fit flex flex-col justify-center gap-2 ">
+            <span className="self-start text-xl"> Questions </span>
+            <span className={`fixed top-10 right-4 self-start text-xl ${(TotalMarks >= CurrentMarks) ? "bg-primary " : "bg-red-500 animate-[pulse_1s_ease-in_infinite] " } p-1  text-white font-bold rounded`}> 
+              Total Marks  {CurrentMarks} 
+            </span>
+            <div className="mt-2 w-full h-fit flex flex-col justify-center gap-2 ">
               {QDetails.map((value, i) => {
                 return (
                   <div
@@ -457,15 +443,21 @@ export default function GeneratePaper() {
                             hideSelectedOptions={true}
                             components={{ Option: component }}
                             onChange={(text, event) => {
-                              const temp = [...QDetails];
-                              setQDetails(
-                                temp.map((value, i) => {
-                                  if (event.name === "Q" + i) {
-                                    value.text = text;
-                                  }
-                                  return value;
-                                })
-                              );
+                              var temp = [...QDetails];
+                              var tempMarks  = 0;
+
+                              temp = temp.map((value, i) => {
+                                if (event.name === "Q" + i) {
+                                  value.marks = text.marks
+                                  value.text = text;
+                                }
+                                tempMarks += value.marks
+                                return value;
+                              })
+
+                              setCurrentMarks(tempMarks)
+
+                              setQDetails(temp);
                             }}
                             value={value.text}
                           />
@@ -478,17 +470,31 @@ export default function GeneratePaper() {
                         className="Button m-2 flex-2 "
                         onClick={(event) => {
                           const temp = [...QDetails];
+                          var tempMarks  = 0;
 
                           setQDetails(
                             temp.map((value, i) => {
+
                               if ("T" + i === event.currentTarget.id) {
-                                value.text = { label: "", value: 0 };
+                                value.text = { label: "", value: 0  ,marks : 0};
                                 value.showText = !value.showText;
+                               
+                                if(!value.showText)
+                                {
+                                  value.subq = []
+                                }
+                                value.marks = 0
                               }
 
+                              tempMarks += parseInt(value.marks+"")
+                             
                               return value;
                             })
-                          );
+                          )
+
+                          
+                          setCurrentMarks(tempMarks)
+                        
                         }}
                       />
 
@@ -497,81 +503,7 @@ export default function GeneratePaper() {
                       </label>
                     </div>
 
-                    <div className="flex items-center justify-center">
-                      <button
-                        id={"B" + i}
-                        className="Button m-2 w-[200px]"
-                        onClick={(event) => {
-                          const temp = [...QDetails];
-                          setQDetails(
-                            temp.map((value, i) => {
-                              if ("B" + i === event.currentTarget.id) {
-                                value.showFilter = !value.showFilter;
-                              }
-                              return value;
-                            })
-                          );
-                        }}
-                      >
-                        Filter
-                      </button>
-                    </div>
-                    {value.showFilter && (
-                      <div className="flex flex-col gap-2 ">
-                        <span className="min-w-full p-0 text-[16px] text-start border-b-2 border-b-primary">
-                          <Select
-                            name={"F0" + i}
-                            placeholder={"Filter By Type"}
-                            options={TypeList}
-                            isMulti
-                            closeMenuOnSelect={false}
-                            hideSelectedOptions={false}
-                            components={{
-                              Option: component,
-                            }}
-                            onChange={(list, event) => {
-                              const temp = [...QDetails];
-                              setQDetails(
-                                temp.map((value, i) => {
-                                  if (event.name === "F0" + i) {
-                                    value.filter.type = list;
-                                  }
-                                  return value;
-                                })
-                              );
-                            }}
-                            allowSelectAll={true}
-                            value={value.filter.type}
-                          />
-                        </span>
-                        <span className="min-w-full p-0 text-[16px] text-start border-b-2 border-b-primary">
-                          <Select
-                            name={"F1" + i}
-                            placeholder={"Filter By Taxonomy"}
-                            options={TaxonomyList}
-                            isMulti
-                            closeMenuOnSelect={false}
-                            hideSelectedOptions={false}
-                            components={{
-                              Option: component,
-                            }}
-                            onChange={(list, event) => {
-                              const temp = [...QDetails];
-                              setQDetails(
-                                temp.map((value, i) => {
-                                  if (event.name === "F1" + i) {
-                                    value.filter.taxonomy = list;
-                                  }
-                                  return value;
-                                })
-                              );
-                            }}
-                            allowSelectAll={true}
-                            value={value.filter.taxonomy}
-                          />
-                        </span>
-                      </div>
-                    )}
+                   
                     <div className="flex flex-col w-[60vw]">
                       {value.subq.map((value, i1) => {
                         return (
@@ -588,21 +520,37 @@ export default function GeneratePaper() {
                                 Option: component,
                               }}
                               onChange={(text, event) => {
-                                const temp = [...QDetails];
-                                setQDetails(
-                                  temp.map((value, i2) => {
-                                    const ids = event.name.split(" ");
+                                var temp = [...QDetails];
+                                var tempCurrentMarks = 0;
 
-                                    if (parseInt(ids[0]) === i2) {
-                                      value.text.marks += text.marks;
-                                      const sq = [...value.subq];
-                                      sq[parseInt(ids[1])] = text;
-                                      value.subq = sq;
-                                    }
+                                temp = temp.map((value, i2) => {
 
-                                    return value;
-                                  })
-                                );
+                                  var tempMarks = value.marks
+                                  const ids = event.name.split(" ");
+
+                                  if (parseInt(ids[0]) === i2) {
+                                    const sq = [...value.subq];
+                                    sq[parseInt(ids[1])] = text;
+                                    value.subq = sq;
+                                  }
+
+                                  if(value.showText)
+                                  {
+                                    tempMarks = 0
+                                    value.subq.forEach((value)=>{
+                                      tempMarks += value.marks
+                                    })
+                                  }
+
+                                  value.marks = tempMarks
+                                  tempCurrentMarks += value.marks
+                                  return value;
+                                })
+
+                                setCurrentMarks(tempCurrentMarks)
+
+                                setQDetails(temp)
+                                
                               }}
                               value={value}
                             />
@@ -621,7 +569,7 @@ export default function GeneratePaper() {
                               if (event.currentTarget.id === "P" + i) {
                                 value.subq = [
                                   ...value.subq,
-                                  { label: "", value: "" },
+                                  { label: "", value: "" ,marks:0},
                                 ];
                               }
 
@@ -646,6 +594,7 @@ export default function GeneratePaper() {
                       taxonomy: [],
                       type: [],
                     },
+                    marks:0,
                     showFilter: false,
                     showText: true,
                     text: { label: ``, value: -1, marks: 0 },
@@ -683,9 +632,10 @@ export default function GeneratePaper() {
                     } else {
                       startTime = startTime[0] + ":" + startTime[1] + " AM";
                     }
+
                     console.log(QDetails);
 
-                    window.api.generateTex({
+                    window.api.rateTex({
                       MetaData: {
                         CourseCode: value.code,
                         CourseName: value.name,

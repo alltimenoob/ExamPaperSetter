@@ -159,8 +159,9 @@ export default function AddQuestion(){
                     </div>
                     
                     
-                    <input type="text" className="TextBox w-full" value={Question}
+                    <textarea className="TextBox w-full " value={Question}
                     onChange={(event)=>{
+                        console.log(event.currentTarget.value)
                         setQuestion(event.currentTarget.value)
                     }} placeholder="Enter Question"/>     
 

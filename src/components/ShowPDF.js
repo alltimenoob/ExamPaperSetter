@@ -33,7 +33,8 @@ export default function ShowPDF(){
             
       {file && <div className="left-10 top-8 absolute flex items-center justify-center w-screen h-full bg-white overflow-hidden" >
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
-          <div  className=" w-full  max-w-[800px] border-2 h-full overflow-hidden">
+          <div  className=" w-full  max-w-[800px] 
+           h-full overflow-hidden">
           <Viewer fileUrl={file} plugins={[pageNavigationPluginInstance]}/>;
           </div>
         </Worker>

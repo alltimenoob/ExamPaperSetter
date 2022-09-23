@@ -640,44 +640,108 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
   questionsCode+='\\begin{questions}\n';
   questionsCode+='\\pointname{}\n';
   questionsCode+='\\pointsinrightmargin\n';
-  questionsCode+='\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}\n';
  
  
   args.forEach(question => {
-   
-    questionsCode+=`\\question[${question.text.marks}]\n`
+    var co = "";
     
- 
+    var taxonomy = question.text.taxonomy_letter
 
+    if(!question.showText)
+    {
+      question.text.cource_outcomes.forEach((value,i)=>{
+        if(i===0) co += value.course_outcomes_number
+        else co += ","+value.course_outcomes_number
+      })
+      questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\\\ ${co + taxonomy}}}`
+    }
+    else
+    {
+      questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`
+    }
+
+
+    
+    
     if(question.showText){//It has sub questions
+      console.log(question)
+      questionsCode+=`\\question[${question.marks}]\n`
  
-        questionsCode+=`${question.text.label}\n`
+      question.text.label = question.text.label.split("\n")
+
+      question.text.label.forEach((value,i)=>{
+          if(i!==0)
+            questionsCode+=`\\rule{0.5cm}{0pt}`
+          if(i===question.text.label.length-1)
+            questionsCode+=`${value}\n`
+          else
+            questionsCode+=`${value}\\\\\n`
+      })
+
+      questionsCode += `\n`
 
 	    questionsCode+=`\\vspace{1.5mm}\n\\begin{parts}\n`
-        question.subq.forEach(sub_q=>{
-            questionsCode+=`\\part ${sub_q.label}\n\n`
-            if(sub_q.question_type_name == "MCQ" )
-            {
-              questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
-              sub_q.mcqs.forEach((option)=>{
-                questionsCode+=`\\choice ${option.option_text}\n`
-              })
-              questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
-            }
+        
+      question.subq.forEach(sub_q=>{
+
+          var co = "";
+    
+          var taxonomy = sub_q.taxonomy_letter
+
+          sub_q.cource_outcomes.forEach((value,i)=>{
+            if(i===0) co += value.course_outcomes_number
+            else co += ","+value.course_outcomes_number
+          })
+
+          questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\\\ ${co + taxonomy}}}`
+          questionsCode+=`\\part[${sub_q.marks}] ${sub_q.label[0]}\\vspace{-\\baselineskip}\\vspace{1.5mm}${sub_q.label.substring(1,sub_q.label.length)} \n\n`
+
+          if(sub_q.question_type_name === "MCQ" )
+          {
+            questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
+
+            sub_q.mcqs.forEach((option)=>{
+              questionsCode+=`\\choice ${option.option_text}\n`
+            })
+
+            questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
+          }
+          questionsCode+= `\\vspace{5mm}`
         });
         questionsCode+='\\end{parts}\n'
     }
     else{ //It has no sub questions
- 
-        questionsCode+=`\\vspace{1.5mm}${question.text.label}\n\n`
-		if(question.text.question_type_name == "MCQ" )
-		{
-			questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
-			question.text.mcqs.forEach((option)=>{
-			 questionsCode+=`\\choice ${option.option_text}\n`
-			})
-			questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
-		}
+      questionsCode+=`\\question[${question.text.marks}]\n`
+      
+      const mltQuestion = question.text.label.split("\n")
+      
+      if(mltQuestion.length > 1)
+      {
+        mltQuestion.forEach((value,i)=>{
+          if(i!==0)
+            questionsCode+=`\\rule{0.5cm}{0pt}`
+          if(i===mltQuestion.length-1)
+            questionsCode+=`${value}\n`
+          else
+            questionsCode+=`${value}\\\\\n`
+        })
+      }
+      else
+      {
+        questionsCode+=`${mltQuestion[0]}\n`
+      }
+      
+
+      if(question.text.question_type_name === "MCQ" )
+      {
+        questionsCode+=`\\vspace{1.5mm}\n\\begin{oneparchoices}\n`
+        
+        question.text.mcqs.forEach((option)=>{
+          questionsCode+=`\\choice ${option.option_text}\n`
+        })
+
+        questionsCode+=`\\end{oneparchoices}\n\\vspace{1.5mm}\n`
+      }
     }
 
   });
