@@ -16,7 +16,8 @@
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 /* Track */
@@ -24,9 +25,19 @@
   background: #FFFFFF; 
 }
  
+.filter::-webkit-scrollbar-track{
+  background: #1C6758; 
+}
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: #4e6d87; 
+}
+
+.filter::-webkit-scrollbar-thumb {
+  background: #FFFFFF; 
+}
+.filter::-webkit-scrollbar-thumb:hover {
+  background: #FFFFFF; 
 }
 
 /* Handle on hover */

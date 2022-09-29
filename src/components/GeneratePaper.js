@@ -1,6 +1,6 @@
 import TitleBar from "./TitleBar";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { default as Select, components } from "react-select";
 import { AiFillPlusCircle } from "react-icons/ai";
 import {GoSettings} from "react-icons/go"
@@ -35,12 +35,14 @@ export default function GeneratePaper() {
     { label: "End Semester Examination", value: 2 },
   ];
   const [Page, setPage] = useState("MetaData");
+  const [ShowFilter,setShowFilter] = useState(false);
 
   const [CourseOutcomeList, setCourseOutcomeList] = useState([{ value: "" }]);
   const [UnitsList, setUnitsList] = useState([{ value: "" }]);
   const [TaxonomyList, setTaxonomyList] = useState([{}]);
   const [TypeList, setTypeList] = useState([{}]);
   const [QuestionsList, setQuestionsList] = useState([{}]);
+  const [FilteredList, setFilteredList] = useState([{}]);
   const [Instructions, setInstructions] = useState([]);
 
   const [SelectByUnit, setSelectByUnit] = useState(false);
@@ -74,16 +76,16 @@ export default function GeneratePaper() {
       setUnitsList(
         values[2].units.map((value) => {
           return {
-            label: "Unit : " + value.unit_name,
-            value: value.unit_id.toString(),
+            label:  value.unit_name,
+            value: value.unit_id,
           };
         })
       );
       setCourseOutcomeList(
         values[1].cos.map((value) => {
           return {
-            label: "CO : " + value.course_outcomes_description,
-            value: value.course_outcomes_number,
+            label:  value.course_outcomes_description,
+            value: value.course_outcomes_id,
           };
         })
       );
@@ -106,24 +108,65 @@ export default function GeneratePaper() {
       );
     });
 
-    
-
     const questions = window.api.getQuestions({ course_id: CourseID });
 
     questions.then((result) => {
+      result = result.map((value) => {
+        value.value = value.question_id;
+        value.label = value.question_text;
+        delete value.question_id;
+        delete value.question_text;
 
-      setQuestionsList(
-        result.map((value) => {
-          value.value = value.question_id;
-          value.label = value.question_text;
-          delete value.question_id;
-          delete value.question_text;
+        return value;
+      })
 
-          return value;
-        })
-      );
+      setQuestionsList(result)
+      setFilteredList(result)
     });
   }, [CourseID]);
+
+  const [SelectedFilter, setSelectedFilter ] = useState({"course_outcomes":[],"types":[],"taxonomies":[],"units":[]})
+
+  const calculateFilter = () => {
+
+    var filterList = SelectedFilter
+
+    var temp = QuestionsList
+
+    if(filterList.course_outcomes.length > 0 )
+    {
+      temp = temp.filter((value)=>  {
+        return value.cource_outcomes.some(co => filterList.course_outcomes.includes(co.course_outcomes_id) ) 
+      })
+    }
+    
+    
+    if(filterList.units.length > 0 )
+    {
+      temp = temp.filter((question)=>{
+        return filterList.units.includes(question.unit_id)
+      })
+
+    }
+
+    if(filterList.types.length > 0 )
+    {
+      temp = temp.filter((question)=>{
+        return filterList.types.includes(question.question_type_id)
+      })
+    }
+
+    if(filterList.taxonomies.length > 0 )
+    {
+      temp = temp.filter((question)=>{
+        return filterList.taxonomies.includes(question.taxonomy_id)
+      })
+    }
+    
+
+    console.log(temp)
+    setFilteredList(temp)
+  }
 
   const component = (props) => {
     return (
@@ -176,20 +219,145 @@ export default function GeneratePaper() {
       <IoArrowBackCircleOutline
         className="absolute left-0 top-8 w-9 h-9 text-white  overflow-auto"
         onClick={() => {
-          if (Page === "Questions") setPage("MetaData");
+          if (Page === "Questions") {
+            setPage("MetaData");
+            setShowFilter(false)
+          }
           else window.api.goBack();
         }}
       />
 
     {Page==="Questions" && <GoSettings
-        className="absolute left-0 top-24 p-[3px] w-9 h-9 text-white overflow-auto"
+        className="absolute left-0 top-24 p-[3px] w-9 h-9 text-white overflow-auto animate-pulse"
         onClick={() => {
-          
+          setShowFilter(!ShowFilter)
         }}
       />}
+    
+    <div className={` ${(ShowFilter) ? `visible ` : `invisible`} p-1 absolute top-24 z-50 h-[300px] w-[300px] items-start justify-start rounded-lg shadow-lg text-white font-bold left-11 bg-primary`}>
+      
+      <span>Select Filter</span>
+
+      <div className="flex gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
+      {CourseOutcomeList.map((value,i)=>{
+        return<span key={i} className="flex-none bg-white p-1 rounded min-w-[50px] w-max text-[12px] cursor-pointer" onClick={(event)=>{
+
+          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
+          {
+            event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+            const temp = SelectedFilter
+            const index = temp.course_outcomes.indexOf(value.value) 
+            temp.course_outcomes.splice(index,1) 
+            console.log(temp)
+            setSelectedFilter(temp)
+            calculateFilter()
+            
+          }
+          else
+          {
+            event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+            const temp = SelectedFilter
+            temp.course_outcomes.indexOf(value.value) === -1 ? temp.course_outcomes.push(value.value) : console.log() 
+            console.log(temp)
+            setSelectedFilter(temp)
+            calculateFilter()
+          }
+           
+
+          
+        }}>CO : {value.label}</span>
+       })}
+      </div>
+
+      <div className="flex gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
+      {UnitsList.map((value,i)=>{
+        return<span 
+          key={i} 
+          className="bg-white p-1 rounded min-w-[50px] w-max text-[12px] cursor-pointer" 
+          onClick={(event)=>{
+            if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
+            {
+              event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+              const temp = SelectedFilter
+              const index = temp.units.indexOf(value.value) 
+              temp.units.splice(index,1) 
+              console.log(temp)
+              setSelectedFilter(temp)
+              calculateFilter()
+            }
+            else
+            {
+              event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+              const temp = SelectedFilter
+              temp.units.indexOf(value.value) === -1 ? temp.units.push(value.value) : console.log() 
+              console.log(temp)
+              setSelectedFilter(temp)
+              calculateFilter()
+            }
+          }}>Unit : {value.label}</span>
+       })}
+      </div>
+
+      <div className="flex  gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
+      {TypeList.map((value,i)=>{
+        return<span key={i} className="bg-white p-1 rounded  min-w-[50px] w-max  text-[12px] cursor-pointer" onClick={(event)=>{
+          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
+          {
+            event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+            const temp = SelectedFilter
+            const index = temp.types.indexOf(value.value) 
+            temp.types.splice(index,1) 
+            console.log(temp)
+            setSelectedFilter(temp)
+            calculateFilter()
+          }
+          else
+          {
+            event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+            const temp = SelectedFilter
+            temp.types.indexOf(value.value) === -1 ? temp.types.push(value.value) : console.log() 
+            console.log(temp)
+            setSelectedFilter(temp)
+            calculateFilter()
+          }
+        }}>{value.label}</span>
+       })}
+      </div>
+
+      <div className="flex  gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
+      {TaxonomyList.map((value,i)=>{
+        return<span key={i} className="bg-white p-1 rounded  min-w-[50px] w-max text-[12px] cursor-pointer" onClick={(event)=>{
+          
+          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
+            {
+              event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+              const temp = SelectedFilter
+              const index = temp.taxonomies.indexOf(value.value) 
+              temp.taxonomies.splice(index,1) 
+              console.log(temp)
+              setSelectedFilter(temp)
+              calculateFilter()
+            }
+            else
+            {
+              event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+              const temp = SelectedFilter
+              temp.taxonomies.indexOf(value.value) === -1 ? temp.taxonomies.push(value.value) : console.log() 
+              console.log(temp)
+              setSelectedFilter(temp)
+              calculateFilter()
+            }
+
+        }}>{(value.label!==undefined) ?  value.label.toUpperCase() : value.label }</span>
+       })}
+      </div>
+    </div>
 
 
-      <div className="absolute mt-8 p-5 left-10 right-0 w-90 h-screen overflow-y-scroll bg-white flex flex-col items-start">
+
+      <div 
+      onClick={()=>{setShowFilter(false)}}
+      className="absolute mt-8 p-5 left-10 right-0 w-90 h-screen overflow-y-scroll bg-white flex flex-col items-start">
         {Page === "MetaData" && (
           <div className="w-full pb-10 h-full bg-white">
             <span className=" self-start text-xl"> Meta Data </span>
@@ -439,7 +607,7 @@ export default function GeneratePaper() {
                           <Select
                             name={"Q" + i}
                             placeholder={"Select Question"}
-                            options={QuestionsList}
+                            options={FilteredList}
                             hideSelectedOptions={true}
                             components={{ Option: component }}
                             onChange={(text, event) => {
@@ -514,7 +682,7 @@ export default function GeneratePaper() {
                             <Select
                               name={i + " " + i1}
                               placeholder={"Select Question"}
-                              options={QuestionsList}
+                              options={FilteredList}
                               hideSelectedOptions={true}
                               components={{
                                 Option: component,
