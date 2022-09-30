@@ -1,19 +1,19 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.8.28) (preloaded format=pdflatex 2022.9.18)  23 SEP 2022 18:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.7) (preloaded format=pdflatex 2022.9.30)  30 SEP 2022 09:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **./exam_paper__.tex
 (exam_paper__.tex
 LaTeX2e <2022-06-01> patch level 5
-L3 programming layer <2022-08-30>
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/exam\exam.cls
+L3 programming layer <2022-07-04>
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/exam\exam.cls
 Document Class: exam 2021/02/26 Version 2.7 by Philip Hirschhorn
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
 Package: ifthen 2022/04/13 v1.1d Standard LaTeX ifthen package (DPC)
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
 Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo
 File: size12.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count185
@@ -104,17 +104,17 @@ File: size12.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
 \exam@FrameRule=\dimen140
 \exam@FrameSep=\dimen141
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
 Package: geometry 2020/01/02 v5.9 Page Geometry
 
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks21
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
 Package: iftex 2022/02/03 v1.0f TeX engine tests
 ))
 \Gm@cnth=\count300
@@ -130,8 +130,8 @@ Package: iftex 2022/02/03 v1.0f TeX engine tests
 \Gm@layoutvoffset=\dimen149
 \Gm@dimlist=\toks22
 
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
 Package: enumitem 2019/06/20 v3.9 Customized lists
 \labelindent=\skip74
 \enit@outerparindent=\dimen150
@@ -140,24 +140,24 @@ Package: enumitem 2019/06/20 v3.9 Customized lists
 \enit@count@id=\count303
 \enitdp@description=\count304
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
 Package: amsmath 2022/04/08 v2.17n AMS math features
 \@mathmargin=\skip75
 
 For additional information on amsmath, use the `?' option.
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
 Package: amstext 2021/08/26 v2.01 AMS text
 
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks24
 \ex@=\dimen151
 ))
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen152
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
 \inf@bad=\count305
@@ -208,25 +208,25 @@ LaTeX Info: Redefining \Relbar on input line 971.
 LaTeX Info: Redefining \[ on input line 2953.
 LaTeX Info: Redefining \] on input line 2954.
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/stackengine\stackengine
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/stackengine\stackengine
 .sty
 Package: stackengine 2021/07/22 v4.11\ Stacking text and objects in convenient 
 ways
 
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count317
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/listofitems\listofitems
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/listofitems\listofitems
 .sty
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/generic/listofitems\listofite
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/generic/listofitems\listofite
 ms.tex
 \loi_cnt_foreach_nest=\count318
 \loi_nestcnt=\count319
 )
 Package: listofitems 2019/08/21 v1.63 Grab items in lists using user-specified 
 sep char (CT)
-) (C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty
+) (C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty
 Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
 \calc@Acount=\count320
 \calc@Bcount=\count321
@@ -252,12 +252,12 @@ LaTeX Info: Redefining \addtolength on input line 81.
 \@centerbox=\box60
 \c@ROWcellindex@=\count324
 )
-(C:\Users\mihir\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+(C:\Users\Mihir\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
-File: l3backend-pdftex.def 2022-08-30 L3 backend support: PDF output (pdfTeX)
+File: l3backend-pdftex.def 2022-07-01 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count325
 \l__pdf_internal_box=\box61
-) (D:\projects\exampaper\best\ExamPaperSetter\output\exam_paper__.aux)
+) (D:\ExamPaperSetter\output\exam_paper__.aux)
 \openout1 = `exam_paper__.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
@@ -329,36 +329,38 @@ Overfull \hbox (56.9055pt too wide) in paragraph at lines 44--46
 | 
  []
 
-[1
 
-{C:/Users/mihir/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-This exam contains 1 questions with 2 parts, 0 subparts, and 0 subsubparts.
-This exam has a total of 15 points.
-This exam has a total of 0 bonus points.
+! LaTeX Error: Something's wrong--perhaps a missing \item.
 
-Class exam Warning: Point totals have changed. Rerun to get point totals right.
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.49 \end{questions}
+                    
+? 
+! Emergency stop.
+ ...                                              
+                                                  
+l.49 \end{questions}
+                    
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
 
-
-(D:\projects\exampaper\best\ExamPaperSetter\output\exam_paper__.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+ 
 Here is how much of TeX's memory you used:
- 3941 strings out of 475389
- 61536 string characters out of 2777000
- 431027 words of memory out of 3000000
- 25331 multiletter control sequences out of 15000+600000
+ 3920 strings out of 478338
+ 61067 string characters out of 2836700
+ 384855 words of memory out of 3000000
+ 22367 multiletter control sequences out of 15000+600000
  470560 words of font info for 32 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,10n,62p,253b,297s stack positions out of 10000i,1000n,20000p,200000b,80000s
- <C:\Users\mihir\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
-1200.pk><C:/Users/mihir/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
-ts/cm/cmbx12.pfb><C:/Users/mihir/AppData/Local/Programs/MiKTeX/fonts/type1/publ
-ic/amsfonts/cm/cmbxti10.pfb><C:/Users/mihir/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmr12.pfb>
-Output written on D:\projects\exampaper\best\ExamPaperSetter\output\exam_paper_
-_.pdf (1 page, 47992 bytes).
+ 55i,2n,62p,253b,178s stack positions out of 10000i,1000n,20000p,200000b,80000s
+!  ==> Fatal error occurred, no output PDF file produced!
+nts/cm/cmr12.pfb
+>
+Output written on D:\ExamPaperSetter\output\exam_paper__.pdf (1 page, 48096 byt
+es).
 PDF statistics:
  26 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

@@ -16,8 +16,8 @@
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 /* Track */
@@ -30,9 +30,13 @@
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #4e6d87; 
+  background: #1C6758; 
 }
 
+.filter::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
 .filter::-webkit-scrollbar-thumb {
   background: #FFFFFF; 
 }
@@ -42,7 +46,7 @@
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #273541; 
+  background: #1C6758; 
 }
 
 body {
@@ -83,7 +87,7 @@ input[type=number] {
 
 @layer components{
   .TitleBar{
-    @apply absolute overflow-auto top-0 max-h-[32px] min-h-[32px] min-w-full font-normal text-base flex items-center justify-between
+    @apply fixed overflow-auto top-0 max-h-[32px] min-h-[32px] min-w-full font-normal text-base flex items-center justify-between
       pl-2 z-20 text-white
   }
   

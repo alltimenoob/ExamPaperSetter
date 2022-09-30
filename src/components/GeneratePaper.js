@@ -1,76 +1,81 @@
-import TitleBar from "./TitleBar";
-import { IoArrowBackCircleOutline } from "react-icons/io5";
-import { useEffect, useRef, useState } from "react";
-import { default as Select, components } from "react-select";
-import { AiFillPlusCircle } from "react-icons/ai";
+import TitleBar from "./TitleBar" 
+import { IoArrowBackCircleOutline } from "react-icons/io5" 
+import { useEffect, useRef, useState } from "react" 
+import { default as Select, components } from "react-select" 
+import { AiFillPlusCircle } from "react-icons/ai" 
 import {GoSettings} from "react-icons/go"
-import { IoIosPaper } from "react-icons/io";
+import { IoIosPaper } from "react-icons/io" 
+
+/* -- For PDF -- */
+import { Worker } from '@react-pdf-viewer/core' 
+import { Viewer } from '@react-pdf-viewer/core' 
+import { pageNavigationPlugin } from '@react-pdf-viewer/page-navigation' 
+
+import '@react-pdf-viewer/core/lib/styles/index.css';
+
+/* ------- */
 
 export default function GeneratePaper() {
-  const date = new Date();
+  const date = new Date() 
 
-  const CourseID = new URLSearchParams(window.location.search).get("course_id");
+  const CourseID = new URLSearchParams(window.location.search).get("course_id") 
 
   const YearList = [
     { label: "First", value: 0 },
     { label: "Second", value: 1 },
     { label: "Third", value: 2 },
     { label: "Fourth", value: 3 },
-  ];
+  ] 
 
   const StreamList = [
     { label: "B.Tech", value: 0 },
     { label: "M.Tech", value: 1 },
     { label: "PDDC", value: 2 },
-  ];
+  ] 
 
   const SemesterList = [
     { label: "Odd", value: 0 },
     { label: "Even", value: 1 },
-  ];
+  ] 
 
   const ExamTypeList = [
     { label: "1st Mid Semester Examination", value: 0 },
     { label: "2nd Mid Semester Examination", value: 1 },
     { label: "End Semester Examination", value: 2 },
-  ];
-  const [Page, setPage] = useState("MetaData");
-  const [ShowFilter,setShowFilter] = useState(false);
+  ] 
 
-  const [CourseOutcomeList, setCourseOutcomeList] = useState([{ value: "" }]);
-  const [UnitsList, setUnitsList] = useState([{ value: "" }]);
-  const [TaxonomyList, setTaxonomyList] = useState([{}]);
-  const [TypeList, setTypeList] = useState([{}]);
-  const [QuestionsList, setQuestionsList] = useState([{}]);
-  const [FilteredList, setFilteredList] = useState([{}]);
-  const [Instructions, setInstructions] = useState([]);
+  const [Page, setPage] = useState("MetaData") 
+  const [ShowFilter,setShowFilter] = useState(false) 
 
-  const [SelectByUnit, setSelectByUnit] = useState(false);
-
-  const [SelectedCOList, setSelectedCOList] = useState([]);
-  const [SelectedUnitList, setSelectedUnitList] = useState([]);
+  const [CourseOutcomeList, setCourseOutcomeList] = useState([{ value: "" }]) 
+  const [UnitsList, setUnitsList] = useState([{ value: "" }]) 
+  const [TaxonomyList, setTaxonomyList] = useState([{}]) 
+  const [TypeList, setTypeList] = useState([{}]) 
+  const [QuestionsList, setQuestionsList] = useState([{}]) 
+  const [FilteredList, setFilteredList] = useState([{}]) 
+  const [Instructions, setInstructions] = useState([]) 
 
   const [CurrentMarks,setCurrentMarks] = useState(0)
 
-  const [TotalMarks, setTotalMarks] = useState("");
-  const [Year, setYear] = useState("");
-  const [Stream, setStream] = useState("");
+  const [TotalMarks, setTotalMarks] = useState("") 
+  const [Year, setYear] = useState("") 
+  const [Stream, setStream] = useState("") 
   const [AY, setAY] = useState(
     "AY " + date.getFullYear() + "-" + (date.getYear() + 1 - 100)
-  );
-  const [Semester, setSemester] = useState("");
-  const [ExamDate, setExamDate] = useState("");
-  const [StartTime, setStartTime] = useState("00:00");
-  const [EndTime, setEndTime] = useState("00:00");
-  const [ExamType, setExamType] = useState("");
+  ) 
+  const [Semester, setSemester] = useState("") 
+  const [ExamDate, setExamDate] = useState("") 
+  const [StartTime, setStartTime] = useState("00:00") 
+  const [EndTime, setEndTime] = useState("00:00") 
+  const [ExamType, setExamType] = useState("") 
 
-  const [QDetails, setQDetails] = useState([]);
+  const [QDetails, setQDetails] = useState([]) 
 
   useEffect(() => {
-    const taxonomy = window.api.getTaxonomy(CourseID);
-    const co = window.api.getCOs(CourseID);
-    const units = window.api.getUnits(CourseID);
-    const types = window.api.getQuestionTypes(CourseID);
+    const taxonomy = window.api.getTaxonomy(CourseID) 
+    const co = window.api.getCOs(CourseID) 
+    const units = window.api.getUnits(CourseID) 
+    const types = window.api.getQuestionTypes(CourseID) 
 
     Promise.all([taxonomy, co, units, types]).then((values) => {
       setUnitsList(
@@ -78,52 +83,52 @@ export default function GeneratePaper() {
           return {
             label:  value.unit_name,
             value: value.unit_id,
-          };
+          } 
         })
-      );
+      ) 
       setCourseOutcomeList(
         values[1].cos.map((value) => {
           return {
             label:  value.course_outcomes_description,
             value: value.course_outcomes_id,
-          };
+          } 
         })
-      );
+      ) 
       setTaxonomyList(
         values[0].taxonomy.map((value) => {
           return {
             label: value.taxonomy_name,
             value: value.taxonomy_id,
             percentage: 0,
-          };
+          } 
         })
-      );
+      ) 
       setTypeList(
         values[3].question_types.map((value) => {
           return {
             label: value.question_type_name,
             value: value.question_type_id,
-          };
+          } 
         })
-      );
-    });
+      ) 
+    }) 
 
-    const questions = window.api.getQuestions({ course_id: CourseID });
+    const questions = window.api.getQuestions({ course_id: CourseID }) 
 
     questions.then((result) => {
       result = result.map((value) => {
-        value.value = value.question_id;
-        value.label = value.question_text;
-        delete value.question_id;
-        delete value.question_text;
+        value.value = value.question_id 
+        value.label = value.question_text 
+        delete value.question_id 
+        delete value.question_text 
 
-        return value;
+        return value 
       })
 
       setQuestionsList(result)
       setFilteredList(result)
-    });
-  }, [CourseID]);
+    }) 
+  }, [CourseID]) 
 
   const [SelectedFilter, setSelectedFilter ] = useState({"course_outcomes":[],"types":[],"taxonomies":[],"units":[]})
 
@@ -140,13 +145,11 @@ export default function GeneratePaper() {
       })
     }
     
-    
     if(filterList.units.length > 0 )
     {
       temp = temp.filter((question)=>{
         return filterList.units.includes(question.unit_id)
       })
-
     }
 
     if(filterList.types.length > 0 )
@@ -163,10 +166,11 @@ export default function GeneratePaper() {
       })
     }
     
-
-    console.log(temp)
     setFilteredList(temp)
   }
+
+  const pageNavigationPluginInstance = pageNavigationPlugin() 
+  const [file,setFile] = useState(null)
 
   const component = (props) => {
     return (
@@ -196,15 +200,15 @@ export default function GeneratePaper() {
               <div className="flex gap-2 rounded bg-blue-400 p-[2px] pr-[4px]">
                 <span>COs</span>
                 {props.data.cource_outcomes.map((value, i) => {
-                  return <span key={i}>{value.course_outcomes_number}</span>;
+                  return <span key={i}>{value.course_outcomes_number}</span> 
                 })}
               </div>
             </div>
           </div>
         </components.Option>
       </div>
-    );
-  };
+    ) 
+  } 
 
   return (
     <div className="App">
@@ -217,13 +221,17 @@ export default function GeneratePaper() {
       />
 
       <IoArrowBackCircleOutline
-        className="absolute left-0 top-8 w-9 h-9 text-white  overflow-auto"
+        className="fixed left-0 top-8 w-9 h-9 text-white  overflow-auto"
         onClick={() => {
           if (Page === "Questions") {
-            setPage("MetaData");
+            setPage("MetaData")
             setShowFilter(false)
           }
-          else window.api.goBack();
+          else if(Page == "PDF")
+          {
+            setPage("Questions")
+          }
+          else window.api.goBack()
         }}
       />
 
@@ -244,7 +252,7 @@ export default function GeneratePaper() {
 
           if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
           {
-            event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+            event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
             const temp = SelectedFilter
             const index = temp.course_outcomes.indexOf(value.value) 
             temp.course_outcomes.splice(index,1) 
@@ -255,7 +263,7 @@ export default function GeneratePaper() {
           }
           else
           {
-            event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+            event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
             const temp = SelectedFilter
             temp.course_outcomes.indexOf(value.value) === -1 ? temp.course_outcomes.push(value.value) : console.log() 
             console.log(temp)
@@ -277,7 +285,7 @@ export default function GeneratePaper() {
           onClick={(event)=>{
             if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
             {
-              event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+              event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
               const temp = SelectedFilter
               const index = temp.units.indexOf(value.value) 
               temp.units.splice(index,1) 
@@ -287,7 +295,7 @@ export default function GeneratePaper() {
             }
             else
             {
-              event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+              event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
               const temp = SelectedFilter
               temp.units.indexOf(value.value) === -1 ? temp.units.push(value.value) : console.log() 
               console.log(temp)
@@ -303,7 +311,7 @@ export default function GeneratePaper() {
         return<span key={i} className="bg-white p-1 rounded  min-w-[50px] w-max  text-[12px] cursor-pointer" onClick={(event)=>{
           if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
           {
-            event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+            event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
             const temp = SelectedFilter
             const index = temp.types.indexOf(value.value) 
             temp.types.splice(index,1) 
@@ -313,7 +321,7 @@ export default function GeneratePaper() {
           }
           else
           {
-            event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+            event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
             const temp = SelectedFilter
             temp.types.indexOf(value.value) === -1 ? temp.types.push(value.value) : console.log() 
             console.log(temp)
@@ -330,7 +338,7 @@ export default function GeneratePaper() {
           
           if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
             {
-              event.currentTarget.style = "background-color:white ; color:rgb(28 103 88);"
+              event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
               const temp = SelectedFilter
               const index = temp.taxonomies.indexOf(value.value) 
               temp.taxonomies.splice(index,1) 
@@ -340,7 +348,7 @@ export default function GeneratePaper() {
             }
             else
             {
-              event.currentTarget.style = "background-color:rgb(255, 30, 0) ; color:white;"
+              event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
               const temp = SelectedFilter
               temp.taxonomies.indexOf(value.value) === -1 ? temp.taxonomies.push(value.value) : console.log() 
               console.log(temp)
@@ -370,7 +378,7 @@ export default function GeneratePaper() {
                   closeMenuOnSelect={true}
                   hideSelectedOptions={false}
                   onChange={(value) => {
-                    setYear(value);
+                    setYear(value) 
                   }}
                   allowSelectAll={true}
                   value={Year}
@@ -384,7 +392,7 @@ export default function GeneratePaper() {
                   closeMenuOnSelect={true}
                   hideSelectedOptions={false}
                   onChange={(value) => {
-                    setStream(value);
+                    setStream(value) 
                   }}
                   allowSelectAll={true}
                   value={Stream}
@@ -398,7 +406,7 @@ export default function GeneratePaper() {
                   closeMenuOnSelect={true}
                   hideSelectedOptions={false}
                   onChange={(value) => {
-                    setExamType(value);
+                    setExamType(value) 
                   }}
                   allowSelectAll={true}
                   value={ExamType}
@@ -412,7 +420,7 @@ export default function GeneratePaper() {
                   closeMenuOnSelect={true}
                   hideSelectedOptions={false}
                   onChange={(value) => {
-                    setSemester(value);
+                    setSemester(value) 
                   }}
                   allowSelectAll={true}
                   value={Semester}
@@ -423,7 +431,7 @@ export default function GeneratePaper() {
                 type="text"
                 value={AY}
                 onChange={(event) => {
-                  setAY(event.currentTarget.value);
+                  setAY(event.currentTarget.value) 
                 }}
                 className="TextBox w-full"
                 placeholder="Enter Acadamic Year (2020-21)"
@@ -433,10 +441,10 @@ export default function GeneratePaper() {
                 type="text"
                 value={ExamDate}
                 onChange={(event) => {
-                  setExamDate(event.currentTarget.value);
+                  setExamDate(event.currentTarget.value) 
                 }}
                 onFocus={(event) => {
-                  event.currentTarget.type = "date";
+                  event.currentTarget.type = "date" 
                 }}
                 className="TextBox w-full"
                 placeholder="DD.MM.YYYY"
@@ -452,7 +460,7 @@ export default function GeneratePaper() {
                   min="00:00"
                   max="23:59"
                   onChange={(event) => {
-                    setStartTime(event.currentTarget.value);
+                    setStartTime(event.currentTarget.value) 
                   }}
                   className="ml-2 TextBox w-full"
                   placeholder="Enter Start Time"
@@ -470,7 +478,7 @@ export default function GeneratePaper() {
                   max="23:59"
                   step="60"
                   onChange={(event) => {
-                    setEndTime(event.currentTarget.value);
+                    setEndTime(event.currentTarget.value) 
                   }}
                   className="ml-2 TextBox w-full"
                   placeholder="Enter End Time"
@@ -480,11 +488,11 @@ export default function GeneratePaper() {
               <input
                 type="number"
                 onWheel={(event) => {
-                  event.currentTarget.blur();
+                  event.currentTarget.blur() 
                 }}
                 value={TotalMarks}
                 onChange={(event) => {
-                  setTotalMarks(event.currentTarget.value);
+                  setTotalMarks(event.currentTarget.value) 
                 }}
                 className="TextBox w-full"
                 placeholder="Enter Total Marks"
@@ -505,16 +513,16 @@ export default function GeneratePaper() {
                     id={index}
                     value={value.value}
                     onChange={(event) => {
-                      let list = [...Instructions];
+                      let list = [...Instructions] 
                       list = list.map((value) => {
                         if (
                           value.id.toString() === event.target.id.toString()
                         ) {
-                          value.value = event.currentTarget.value;
+                          value.value = event.currentTarget.value 
                         }
-                        return value;
-                      });
-                      setInstructions(list);
+                        return value 
+                      }) 
+                      setInstructions(list) 
                     }}
                     placeholder={`Instructions ${index + 1}`}
                   />
@@ -526,13 +534,13 @@ export default function GeneratePaper() {
                     setInstructions([
                       ...Instructions,
                       { value: "", id: Instructions.length },
-                    ]);
+                    ]) 
                   }}
                 />
                 <button
                   className="Button w-[150px] z-40 fixed bottom-5 right-7"
                   onClick={(event) => {
-                    setPage("Questions");
+                    setPage("Questions") 
                   }}
                 >
                   Next
@@ -544,28 +552,6 @@ export default function GeneratePaper() {
 
         {Page === "Questions" && (
           <div className="w-full h-screen  ">
-            
-            <div className="mt-2 w-full flex flex-col gap-2">
-              
-
-              {SelectByUnit && (
-                <span className="w-full p-0 text-[16px] text-start border-b-2 border-b-primary">
-                  <Select
-                    placeholder={"Select Unit"}
-                    options={UnitsList}
-                    closeMenuOnSelect={false}
-                    hideSelectedOptions={false}
-                    isMulti
-                    onChange={(value) => {
-                      setSelectedUnitList(value);
-                      setSelectedCOList([]);
-                    }}
-                    allowSelectAll={true}
-                    value={SelectedUnitList}
-                  />
-                </span>
-              )}
-            </div>
 
             <span className="self-start text-xl"> Questions </span>
             <span className={`fixed top-10 right-4 self-start text-xl ${(TotalMarks >= CurrentMarks) ? "bg-primary " : "bg-red-500 animate-[pulse_1s_ease-in_infinite] " } p-1  text-white font-bold rounded`}> 
@@ -587,16 +573,16 @@ export default function GeneratePaper() {
                           className="TextBox m-2 w-full flex-1"
                           value={value.text.label}
                           onChange={(event) => {
-                            const temp = [...QDetails];
+                            const temp = [...QDetails] 
 
                             setQDetails(
                               temp.map((value, i) => {
                                 if ("I" + i === event.currentTarget.id) {
-                                  value.text.label = event.currentTarget.value;
+                                  value.text.label = event.currentTarget.value 
                                 }
-                                return value;
+                                return value 
                               })
-                            );
+                            ) 
                           }}
                           placeholder="Enter Question"
                         />
@@ -611,21 +597,21 @@ export default function GeneratePaper() {
                             hideSelectedOptions={true}
                             components={{ Option: component }}
                             onChange={(text, event) => {
-                              var temp = [...QDetails];
-                              var tempMarks  = 0;
+                              var temp = [...QDetails] 
+                              var tempMarks  = 0 
 
                               temp = temp.map((value, i) => {
                                 if (event.name === "Q" + i) {
                                   value.marks = text.marks
-                                  value.text = text;
+                                  value.text = text 
                                 }
                                 tempMarks += value.marks
-                                return value;
+                                return value 
                               })
 
                               setCurrentMarks(tempMarks)
 
-                              setQDetails(temp);
+                              setQDetails(temp) 
                             }}
                             value={value.text}
                           />
@@ -637,15 +623,15 @@ export default function GeneratePaper() {
                         id={"T" + i}
                         className="Button m-2 flex-2 "
                         onClick={(event) => {
-                          const temp = [...QDetails];
-                          var tempMarks  = 0;
+                          const temp = [...QDetails] 
+                          var tempMarks  = 0 
 
                           setQDetails(
                             temp.map((value, i) => {
 
                               if ("T" + i === event.currentTarget.id) {
-                                value.text = { label: "", value: 0  ,marks : 0};
-                                value.showText = !value.showText;
+                                value.text = { label: "", value: 0  ,marks : 0} 
+                                value.showText = !value.showText 
                                
                                 if(!value.showText)
                                 {
@@ -656,7 +642,7 @@ export default function GeneratePaper() {
 
                               tempMarks += parseInt(value.marks+"")
                              
-                              return value;
+                              return value 
                             })
                           )
 
@@ -688,18 +674,18 @@ export default function GeneratePaper() {
                                 Option: component,
                               }}
                               onChange={(text, event) => {
-                                var temp = [...QDetails];
-                                var tempCurrentMarks = 0;
+                                var temp = [...QDetails] 
+                                var tempCurrentMarks = 0 
 
                                 temp = temp.map((value, i2) => {
 
                                   var tempMarks = value.marks
-                                  const ids = event.name.split(" ");
+                                  const ids = event.name.split(" ") 
 
                                   if (parseInt(ids[0]) === i2) {
-                                    const sq = [...value.subq];
-                                    sq[parseInt(ids[1])] = text;
-                                    value.subq = sq;
+                                    const sq = [...value.subq] 
+                                    sq[parseInt(ids[1])] = text 
+                                    value.subq = sq 
                                   }
 
                                   if(value.showText)
@@ -712,7 +698,7 @@ export default function GeneratePaper() {
 
                                   value.marks = tempMarks
                                   tempCurrentMarks += value.marks
-                                  return value;
+                                  return value 
                                 })
 
                                 setCurrentMarks(tempCurrentMarks)
@@ -723,7 +709,7 @@ export default function GeneratePaper() {
                               value={value}
                             />
                           </span>
-                        );
+                        ) 
                       })}
                     </div>
                     {value.showText && (
@@ -731,30 +717,30 @@ export default function GeneratePaper() {
                         className="text-primary m-2"
                         id={"P" + i}
                         onClick={(event) => {
-                          const temp = [...QDetails];
+                          const temp = [...QDetails] 
                           setQDetails(
                             temp.map((value, i) => {
                               if (event.currentTarget.id === "P" + i) {
                                 value.subq = [
                                   ...value.subq,
                                   { label: "", value: "" ,marks:0},
-                                ];
+                                ] 
                               }
 
-                              return value;
+                              return value 
                             })
-                          );
+                          ) 
                         }}
                       />
                     )}
                   </div>
-                );
+                ) 
               })}
 
               <button
                 className="w-[250px]  mb-10  self-center Button"
                 onClick={() => {
-                  const temp = [...QDetails];
+                  const temp = [...QDetails] 
 
                   temp.push({
                     filter: {
@@ -767,9 +753,9 @@ export default function GeneratePaper() {
                     showText: true,
                     text: { label: ``, value: -1, marks: 0 },
                     subq: [],
-                  });
+                  }) 
 
-                  setQDetails(temp);
+                  setQDetails(temp) 
                 }}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -781,14 +767,14 @@ export default function GeneratePaper() {
                 className="flex items-center gap-2 justify-center Button bg-primary text-white fixed w-[80px] h-[60px] bottom-10 right-10 "
                 onClick={() => {
                   window.api.getCourseFromID(CourseID).then((value) => {
-                    let endTime = EndTime.split(":");
-                    let startTime = StartTime.split(":");
+                    let endTime = EndTime.split(":") 
+                    let startTime = StartTime.split(":") 
 
                     if (parseInt(endTime[0]) > 12) {
                       endTime =
-                        (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM";
+                        (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM" 
                     } else {
-                      endTime = endTime[0] + ":" + endTime[1] + " AM";
+                      endTime = endTime[0] + ":" + endTime[1] + " AM" 
                     }
 
                     if (parseInt(startTime[0]) > 12) {
@@ -796,14 +782,14 @@ export default function GeneratePaper() {
                         (parseInt(startTime[0]) % 12) +
                         ":" +
                         startTime[1] +
-                        " PM";
+                        " PM" 
                     } else {
-                      startTime = startTime[0] + ":" + startTime[1] + " AM";
+                      startTime = startTime[0] + ":" + startTime[1] + " AM" 
                     }
 
-                    console.log(QDetails);
+                    console.log(QDetails) 
 
-                    window.api.rateTex({
+                    window.api.generateTex({
                       MetaData: {
                         CourseCode: value.code,
                         CourseName: value.name,
@@ -818,8 +804,18 @@ export default function GeneratePaper() {
                         Instructions: Instructions,
                       },
                       QuestionDetails: QDetails,
-                    });
-                  });
+                    }).then(()=>{
+                      window.api.getFile().then((value)=>{
+                        setFile("data:application/pdf;base64,"+value)
+                      }).then(()=>{
+                        setPage("PDF")
+                      })
+                    })
+
+
+                    
+
+                  }) 
                 }}
               >
                 <IoIosPaper />{" "}
@@ -827,8 +823,23 @@ export default function GeneratePaper() {
             </div>
           </div>
         )}
+        
       </div>
+
+      {Page == "PDF" && 
+        <div className="fixed w-[90vw] h-[90vh] flex items-center justify-center top-10 left-10">
+          { (file != null) && <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+              <div className="w-[100vw] h-[90vh]">
+              <Viewer fileUrl={file} plugins={[pageNavigationPluginInstance]}/> 
+              </div>
+            </Worker> }
+            <button className='fixed bottom-5 right-7 Button w-[150px]'
+              onClick={()=>{
+                window.api.saveFile(file)
+              }}
+            > Save </button>
+        </div>  }
     </div>
-  );
+  ) 
 }
 

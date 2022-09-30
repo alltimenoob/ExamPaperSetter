@@ -570,7 +570,6 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 
 
   ipcMain.handle("getFile",async (event,args)=>{
-    console.log(path.join(app.getAppPath(),"/output/exam_paper__.pdf"))
     try {
       const data = await fsa.readFile(path.join(app.getAppPath(),"/output/exam_paper__.pdf"),{encoding:"base64"});
       return data
@@ -592,7 +591,7 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
     mainWindow.webContents.goBack()
   })
 
-  ipcMain.handle("generateTex", (event,args)=>{
+  ipcMain.handle("generateTex",async (event,args)=>{
 
 
     const MetaData = args.MetaData
@@ -773,24 +772,13 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 
   const { exec } = require('child_process');
   
-  exec('pdflatex --output-directory='+path.join(app.getAppPath(),'/output/')+' exam_paper__.tex', (err, stdout, stderr) => {
-    if (err) {
-      console.log(err)
-      return;
-    }
+  return new Promise((resolve,reject) => {
+    exec('pdflatex --output-directory='+path.join(app.getAppPath(),'/output/')+' exam_paper__.tex', (error,stdout,stderr)=>{ 
+      resolve(stdout.trim())
+    })
 
-    console.log(`stdout: ${stdout}`);
-    console.log(`stderr: ${stderr}`);
-    
-    mainWindow.loadURL(
-      isDev
-        ? 'http://localhost:3000/ShowPDF'
-        : `file://${path.join(__dirname, '../build/index.html')}`
-    );
-  });
-
-  
   })
+})
 
 
   ipcMain.handle('insertQuestion',(event,args)=>{
