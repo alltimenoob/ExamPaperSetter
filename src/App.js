@@ -1,13 +1,13 @@
 
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import OpenCourse from './components/OpenCourse';
-import NewCourse from './components/NewCourse';
-import EditCourse from './components/EditCourse';
-import Course from './components/Course';
-import WelcomeTour from './components/WelcomeTour';
-import AddQuestion from './components/AddQuestion';
-import GeneratePaper from './components/GeneratePaper';
+import OpenCourse from './pages/OpenCourse';
+import NewCourse from './pages/NewCourse';
+import EditCourse from './pages/EditCourse';
+import Course from './pages/Course';
+import WelcomeTour from './pages/WelcomeTour';
+import AddQuestion from './pages/AddQuestion';
+import GeneratePaper from './pages/GeneratePaper';
 
 function App() {
 

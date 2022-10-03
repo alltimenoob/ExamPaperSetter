@@ -1,5 +1,5 @@
 import {  useEffect, useState } from "react"
-import TitleBar from "./TitleBar"
+import TitleBar from "../components/TitleBar"
 import {AiFillPlusCircle} from "react-icons/ai"
 import {IoArrowBackCircleOutline} from "react-icons/io5"
 import {BiReset} from "react-icons/bi"

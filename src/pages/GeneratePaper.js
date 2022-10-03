@@ -1,6 +1,6 @@
-import TitleBar from "./TitleBar" 
+import TitleBar from "../components/TitleBar" 
 import { IoArrowBackCircleOutline } from "react-icons/io5" 
-import { useEffect, useRef, useState } from "react" 
+import { useEffect, useState } from "react" 
 import { default as Select, components } from "react-select" 
 import { AiFillPlusCircle } from "react-icons/ai" 
 import {GoSettings} from "react-icons/go"
@@ -12,8 +12,9 @@ import { Viewer } from '@react-pdf-viewer/core'
 import { pageNavigationPlugin } from '@react-pdf-viewer/page-navigation' 
 
 import '@react-pdf-viewer/core/lib/styles/index.css';
-
 /* ------- */
+
+import QuestionFilter  from "../components/QuestionFilter"
 
 export default function GeneratePaper() {
   const date = new Date() 
@@ -47,10 +48,7 @@ export default function GeneratePaper() {
   const [Page, setPage] = useState("MetaData") 
   const [ShowFilter,setShowFilter] = useState(false) 
 
-  const [CourseOutcomeList, setCourseOutcomeList] = useState([{ value: "" }]) 
-  const [UnitsList, setUnitsList] = useState([{ value: "" }]) 
-  const [TaxonomyList, setTaxonomyList] = useState([{}]) 
-  const [TypeList, setTypeList] = useState([{}]) 
+  
   const [QuestionsList, setQuestionsList] = useState([{}]) 
   const [FilteredList, setFilteredList] = useState([{}]) 
   const [Instructions, setInstructions] = useState([]) 
@@ -72,69 +70,34 @@ export default function GeneratePaper() {
   const [QDetails, setQDetails] = useState([]) 
 
   useEffect(() => {
-    const taxonomy = window.api.getTaxonomy(CourseID) 
-    const co = window.api.getCOs(CourseID) 
-    const units = window.api.getUnits(CourseID) 
-    const types = window.api.getQuestionTypes(CourseID) 
 
-    Promise.all([taxonomy, co, units, types]).then((values) => {
-      setUnitsList(
-        values[2].units.map((value) => {
-          return {
-            label:  value.unit_name,
-            value: value.unit_id,
-          } 
-        })
-      ) 
-      setCourseOutcomeList(
-        values[1].cos.map((value) => {
-          return {
-            label:  value.course_outcomes_description,
-            value: value.course_outcomes_id,
-          } 
-        })
-      ) 
-      setTaxonomyList(
-        values[0].taxonomy.map((value) => {
-          return {
-            label: value.taxonomy_name,
-            value: value.taxonomy_id,
-            percentage: 0,
-          } 
-        })
-      ) 
-      setTypeList(
-        values[3].question_types.map((value) => {
-          return {
-            label: value.question_type_name,
-            value: value.question_type_id,
-          } 
-        })
-      ) 
-    }) 
+    const getQuestions  = async () => {
+      var questions = await window.api.getQuestions({ course_id: CourseID }) 
 
-    const questions = window.api.getQuestions({ course_id: CourseID }) 
-
-    questions.then((result) => {
-      result = result.map((value) => {
+      questions = questions.map((value) => {
         value.value = value.question_id 
         value.label = value.question_text 
         delete value.question_id 
         delete value.question_text 
-
+  
         return value 
       })
 
-      setQuestionsList(result)
-      setFilteredList(result)
-    }) 
+      setQuestionsList(questions)
+      setFilteredList(questions)
+    }
+
+    getQuestions()
+    
   }, [CourseID]) 
 
   const [SelectedFilter, setSelectedFilter ] = useState({"course_outcomes":[],"types":[],"taxonomies":[],"units":[]})
 
-  const calculateFilter = () => {
+  const calculateFilter = (filterList) => {
+    
+    setSelectedFilter(filterList)
 
-    var filterList = SelectedFilter
+    console.log(filterList)
 
     var temp = QuestionsList
 
@@ -227,7 +190,7 @@ export default function GeneratePaper() {
             setPage("MetaData")
             setShowFilter(false)
           }
-          else if(Page == "PDF")
+          else if(Page === "PDF")
           {
             setPage("Questions")
           }
@@ -242,124 +205,8 @@ export default function GeneratePaper() {
         }}
       />}
     
-    <div className={` ${(ShowFilter) ? `visible ` : `invisible`} p-1 absolute top-24 z-50 h-[300px] w-[300px] items-start justify-start rounded-lg shadow-lg text-white font-bold left-11 bg-primary`}>
-      
-      <span>Select Filter</span>
-
-      <div className="flex gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
-      {CourseOutcomeList.map((value,i)=>{
-        return<span key={i} className="flex-none bg-white p-1 rounded min-w-[50px] w-max text-[12px] cursor-pointer" onClick={(event)=>{
-
-          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
-          {
-            event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
-            const temp = SelectedFilter
-            const index = temp.course_outcomes.indexOf(value.value) 
-            temp.course_outcomes.splice(index,1) 
-            console.log(temp)
-            setSelectedFilter(temp)
-            calculateFilter()
-            
-          }
-          else
-          {
-            event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
-            const temp = SelectedFilter
-            temp.course_outcomes.indexOf(value.value) === -1 ? temp.course_outcomes.push(value.value) : console.log() 
-            console.log(temp)
-            setSelectedFilter(temp)
-            calculateFilter()
-          }
-           
-
-          
-        }}>CO : {value.label}</span>
-       })}
-      </div>
-
-      <div className="flex gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
-      {UnitsList.map((value,i)=>{
-        return<span 
-          key={i} 
-          className="bg-white p-1 rounded min-w-[50px] w-max text-[12px] cursor-pointer" 
-          onClick={(event)=>{
-            if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
-            {
-              event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
-              const temp = SelectedFilter
-              const index = temp.units.indexOf(value.value) 
-              temp.units.splice(index,1) 
-              console.log(temp)
-              setSelectedFilter(temp)
-              calculateFilter()
-            }
-            else
-            {
-              event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
-              const temp = SelectedFilter
-              temp.units.indexOf(value.value) === -1 ? temp.units.push(value.value) : console.log() 
-              console.log(temp)
-              setSelectedFilter(temp)
-              calculateFilter()
-            }
-          }}>Unit : {value.label}</span>
-       })}
-      </div>
-
-      <div className="flex  gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
-      {TypeList.map((value,i)=>{
-        return<span key={i} className="bg-white p-1 rounded  min-w-[50px] w-max  text-[12px] cursor-pointer" onClick={(event)=>{
-          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
-          {
-            event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
-            const temp = SelectedFilter
-            const index = temp.types.indexOf(value.value) 
-            temp.types.splice(index,1) 
-            console.log(temp)
-            setSelectedFilter(temp)
-            calculateFilter()
-          }
-          else
-          {
-            event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
-            const temp = SelectedFilter
-            temp.types.indexOf(value.value) === -1 ? temp.types.push(value.value) : console.log() 
-            console.log(temp)
-            setSelectedFilter(temp)
-            calculateFilter()
-          }
-        }}>{value.label}</span>
-       })}
-      </div>
-
-      <div className="flex  gap-2 p-2 text-primary overflow-x-scroll w-full filter  " > 
-      {TaxonomyList.map((value,i)=>{
-        return<span key={i} className="bg-white p-1 rounded  min-w-[50px] w-max text-[12px] cursor-pointer" onClick={(event)=>{
-          
-          if(event.currentTarget.style.backgroundColor === "rgb(255, 30, 0)")
-            {
-              event.currentTarget.style = "background-color:white   color:rgb(28 103 88) "
-              const temp = SelectedFilter
-              const index = temp.taxonomies.indexOf(value.value) 
-              temp.taxonomies.splice(index,1) 
-              console.log(temp)
-              setSelectedFilter(temp)
-              calculateFilter()
-            }
-            else
-            {
-              event.currentTarget.style = "background-color:rgb(255, 30, 0)   color:white "
-              const temp = SelectedFilter
-              temp.taxonomies.indexOf(value.value) === -1 ? temp.taxonomies.push(value.value) : console.log() 
-              console.log(temp)
-              setSelectedFilter(temp)
-              calculateFilter()
-            }
-
-        }}>{(value.label!==undefined) ?  value.label.toUpperCase() : value.label }</span>
-       })}
-      </div>
-    </div>
+     
+    <QuestionFilter CourseID={CourseID} ShowFilter={ShowFilter} SelectedFilter={SelectedFilter} Callback={calculateFilter} />
 
 
 
@@ -826,7 +673,7 @@ export default function GeneratePaper() {
         
       </div>
 
-      {Page == "PDF" && 
+      {Page === "PDF" && 
         <div className="fixed w-[90vw] h-[90vh] flex items-center justify-center top-10 left-10">
           { (file != null) && <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
               <div className="w-[100vw] h-[90vh]">

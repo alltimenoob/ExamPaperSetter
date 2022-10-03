@@ -1,5 +1,5 @@
 import React from "react"
-import TitleBar from "./TitleBar"
+import TitleBar from "../components/TitleBar"
 
 class EditCourse extends React.Component
 {
