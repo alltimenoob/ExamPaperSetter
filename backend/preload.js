@@ -56,6 +56,8 @@ contextBridge.exposeInMainWorld('api', {
 
   getFile : args => ipcRenderer.invoke('getFile',args),
 
+  reload : (callback) => ipcRenderer.on('reload',()=>{callback()}),
+
   testSend: (args) => ipcRenderer.send('test-send', args),//Example Send
 
   testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data) }) // Example Receive

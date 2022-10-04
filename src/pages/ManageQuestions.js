@@ -5,9 +5,13 @@ import QuestionsList from "../components/QuestionsList";
 import "react-toastify/dist/ReactToastify.css";
 import { GoSettings } from "react-icons/go";
 import QuestionFilter from "../components/QuestionFilter";
+import { useLocation } from "react-router-dom";
 
-export default function ManageQuestion() {
-  const CourseID = new URLSearchParams(window.location.search).get("course_id");
+export default function ManageQuestions() {
+
+  const location = useLocation()
+
+  const CourseID = location.state
 
   const [FullQuestionsList, setFullQuestionsList] = useState([{}]);
 

@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs')
 const fsa = require('fs/promises')
 const sqlite= require('sqlite3');
+const UpdateQuestion  = require('./renderer/api/updateQuestion');
 
 let mainWindow,CourseWindow;
 
@@ -176,7 +177,7 @@ ipcMain.handle("close",(event,args)=>{
           app.quit();
           break;
       case "CourseWindow":
-          mainWindow.webContents.reloadIgnoringCache()
+          mainWindow.webContents.send('reload')
           CourseWindow.close()
           break;
       default:
@@ -911,3 +912,5 @@ ipcMain.handle('getQuestions',async (events,args)=>{
   })
   
 })
+
+ipcMain.handle("UpdateQuestion",(event,args)=>UpdateQuestion(event,args))

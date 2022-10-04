@@ -6,9 +6,13 @@ import { BiReset } from "react-icons/bi";
 import { default as Select, components } from "react-select";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
 
 export default function AddQuestion() {
-  const CourseID = new URLSearchParams(window.location.search).get("course_id");
+  
+  const location = useLocation()
+
+  const CourseID = location.state
 
   const [SelectedType, setSelectedType] = useState(0);
   const [Options, setOptions] = useState([{ value: "" }]);

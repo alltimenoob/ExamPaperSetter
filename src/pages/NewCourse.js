@@ -40,7 +40,7 @@ function NewCourse()
 	const [y,setY] = useState(0)
 
     const createCourse = async () =>{
-        
+
         let output = {
 			"name":CourseName,
 			"code":CourseCode,
