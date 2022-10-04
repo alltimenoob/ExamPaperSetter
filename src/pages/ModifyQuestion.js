@@ -1,41 +1,52 @@
-import { useEffect, useState } from "react";
 import TitleBar from "../components/TitleBar";
-import { AiFillPlusCircle } from "react-icons/ai";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
-import { BiReset } from "react-icons/bi";
+import { AiFillPlusCircle } from "react-icons/ai";
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { default as Select, components } from "react-select";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function AddQuestion() {
-  const CourseID = new URLSearchParams(window.location.search).get("course_id");
+export default function ModifyQuestion() {
+  const location = useLocation();
 
-  const [SelectedType, setSelectedType] = useState(0);
-  const [Options, setOptions] = useState([{ value: "" }]);
-  const [Question, setQuestion] = useState("");
-  const [Taxonomy, setTaxonomy] = useState(0);
-  const [Marks, setMarks] = useState(0);
+  console.log(location.state);
 
-  const [CourseOutcomeList, setCourseOutcomeList] = useState([
-    { label: "CO 1", value: "1" },
-    { label: "CO 2", value: "2" },
-  ]);
-  const [UnitsList, setUnitsList] = useState([
-    { label: "Unit 1", value: "1" },
-    { label: "Unit 2", value: "2" },
-  ]);
+  //const QuestionID = location.state.value;
+  const CourseID = location.state.course_id;
+
+  const [SelectedType, setSelectedType] = useState(
+    location.state.question_type_id
+  );
+  const [Options, setOptions] = useState(
+    location.state.mcqs === undefined
+      ? [{ label: "", id: 0 }]
+      : location.state.mcqs
+  );
+  const [Question, setQuestion] = useState(location.state.label);
+  const [Taxonomy, setTaxonomy] = useState(location.state.taxonomy_id);
+  const [Marks, setMarks] = useState(location.state.marks);
+
+  const [CourseOutcomeList, setCourseOutcomeList] = useState([]);
+  const [UnitsList, setUnitsList] = useState([]);
   const [TypeList, setTypeList] = useState([]);
-  const [TaxonomyList, setTaxonomyList] = useState([
-    { value: "Apply" },
-    { value: "Analyze" },
-  ]);
+  const [TaxonomyList, setTaxonomyList] = useState([]);
 
-  const [SelectedCOList, setSelectedCOList] = useState(null);
-  const [SelectedUnit, setSelectedUnit] = useState(null);
-  const [SelectedImage, setSelectedImage] = useState("");
+  const [SelectedCOList, setSelectedCOList] = useState(
+    location.state.cource_outcomes
+  );
+  const [SelectedUnit, setSelectedUnit] = useState({
+    label: location.state.unit_name,
+    value: location.state.unit_id,
+  });
+  const [SelectedImage, setSelectedImage] = useState(
+    location.state.question_image
+  );
   const [ShowImage, setShowImage] = useState(false);
 
   useEffect(() => {
+    if (location.state === (undefined || null)) return;
+
     const units = window.api.getUnits(CourseID);
     const co = window.api.getCOs(CourseID);
     const taxonomy = window.api.getTaxonomy();
@@ -46,23 +57,21 @@ export default function AddQuestion() {
         setUnitsList(
           values[0].units.map((value) => {
             return {
-              label: "Unit : " + value.unit_name,
-              value: value.unit_id.toString(),
+              label: value.unit_name,
+              value: value.unit_id,
             };
           })
         );
         setCourseOutcomeList(
           values[1].cos.map((value) => {
             return {
-              label: "CO : " + value.course_outcomes_description,
+              label: value.course_outcomes_description,
               value: value.course_outcomes_id,
             };
           })
         );
         setTaxonomyList(values[2].taxonomy);
-        setTaxonomy(values[2].taxonomy[0].taxonomy_id);
         setTypeList(values[3].question_types);
-        setSelectedType(values[3].question_types[0].question_type_id);
       })
       .catch(() => {
         const options = {
@@ -80,7 +89,7 @@ export default function AddQuestion() {
         window.api.showDialog(options);
         window.api.goBack();
       });
-  }, [CourseID]);
+  }, [CourseID,location.state]);
 
   const component = (props) => {
     return (
@@ -97,24 +106,20 @@ export default function AddQuestion() {
     );
   };
 
+  if (location.state === (undefined || null)) return <div>Nothing</div>;
+
   return (
     <div className="App">
-      <TitleBar
-        name={"Add Questions"}
-        close={true}
-        max={true}
-        min={true}
-        window="mainWindow"
-      />
+      <TitleBar name="Modify Question" min={true} max={true} close={true} />
 
       <IoArrowBackCircleOutline
-        className="mt-8 w-9 h-9 text-white ml-1 mr-1"
+        className="fixed top-8 left-0 right-0 bottom-0 w-9 h-9 text-white ml-1 mr-1"
         onClick={() => {
           window.api.goBack();
         }}
       />
 
-      <div className="mt-8 pb-9 w-screen h-screen bg-white flex items-start overflow-y-scroll">
+      <div className="fixed top-8 left-10 right-0 bottom-0 bg-white flex items-start overflow-y-scroll">
         <div className="m-5 mt-10 flex flex-col gap-2 w-screen max-h-full ">
           <div className="flex gap-2">
             <select
@@ -183,7 +188,6 @@ export default function AddQuestion() {
                 onChange={(value) => {
                   setSelectedUnit(value);
                 }}
-                allowSelectAll={true}
                 value={SelectedUnit}
               />
             </span>
@@ -193,7 +197,6 @@ export default function AddQuestion() {
             className="TextBox w-full "
             value={Question}
             onChange={(event) => {
-              console.log(event.currentTarget.value);
               setQuestion(event.currentTarget.value);
             }}
             placeholder="Enter Question"
@@ -211,12 +214,14 @@ export default function AddQuestion() {
                   <input
                     type="text"
                     key={index}
-                    value={value.value}
+                    value={value.label}
                     className="TextBox mb-2 w-full"
                     onChange={(event) => {
-                      console.log(Options);
                       const temp = [...Options];
-                      temp[index] = { value: event.currentTarget.value };
+                      temp[index] = {
+                        label: event.currentTarget.value,
+                        id: index,
+                      };
                       setOptions(temp);
                     }}
                     placeholder={"Option " + String.fromCharCode(index + 65)}
@@ -290,6 +295,7 @@ export default function AddQuestion() {
           )}
 
           <div className="flex w-full gap-2 justify-center items-center">
+          {/* FIX THIS ✌👀 */}  <button className="Button mt-5 flex-1">Update</button>
             <button
               className="Button mt-5 flex-1"
               onClick={() => {
@@ -323,21 +329,8 @@ export default function AddQuestion() {
                 toast("Question Added Successfully");
               }}
             >
-              {" "}
-              Submit{" "}
+              Save As New
             </button>
-            <BiReset
-              className="text-primary h-[30px] w-auto mt-5 flex-5 cursor-pointer"
-              onClick={() => {
-                setSelectedType("Short");
-                setOptions([{ value: "" }]);
-                setQuestion("");
-                setTaxonomy("");
-                setSelectedCOList("");
-                setSelectedUnit("");
-                setShowImage("");
-              }}
-            />
           </div>
         </div>
       </div>

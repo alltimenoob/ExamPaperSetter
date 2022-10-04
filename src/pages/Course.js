@@ -4,9 +4,13 @@ import TitleBar from "../components/TitleBar"
 import {IoArrowBackCircleOutline,IoCreate,IoAddCircle} from "react-icons/io5"
 import {BsFillPatchQuestionFill,BsInboxesFill} from "react-icons/bs"
 import {GiWhiteBook} from "react-icons/gi"
+import { useNavigate } from "react-router-dom";
 
 export default function Course()
 {
+
+    const navigate = useNavigate()
+
     const [Course,SetCourse] = useState({})
     const url = new URLSearchParams(window.location.search)
 
@@ -42,7 +46,7 @@ export default function Course()
             <div 
                 className="mt-5 pt-2 pb-2 flex text-[12px] items-center justify-start text-white hover:bg-primaryDark"
                 onClick={()=>{
-                    window.api.openGenereatePaper(url.get("course_id"))
+                    navigate('/GeneratePaper',{"state":url.get("course_id")})
                 }}
             >
                 <IoCreate className="w-9 h-9  ml-1 mr-1" />
@@ -63,7 +67,7 @@ export default function Course()
             <div 
                 className="flex pt-2 pb-2 text-[12px] items-center justify-start text-white hover:bg-primaryDark"
                 onClick={()=>{
-                    window.api.openUpdateQuestion(url.get("course_id"))
+                    window.api.openManageQuestion(url.get("course_id"))
                 }}
             >
             

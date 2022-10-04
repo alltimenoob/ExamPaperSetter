@@ -537,6 +537,25 @@ ipcMain.handle("openCourse",(event,args)=>{
 })
 
 
+ipcMain.handle("openManageQuestion",(event,args)=>{
+
+  mainWindow.loadURL(
+    isDev
+      ? 'http://localhost:3000/ManageQuestion?course_id='+args 
+      : `file://${path.join(__dirname, '../build/index.html')}`
+  );
+})
+
+
+ipcMain.handle("openModifyQuestion",(event,args)=>{
+
+  mainWindow.loadURL(
+    isDev
+      ? 'http://localhost:3000/ModifyQuestion?course_id='+args 
+      : `file://${path.join(__dirname, '../build/index.html')}`
+  );
+})
+
 
 ipcMain.handle("getCourseFromID",async (event,args)=>{
   //function returns JSON Object which contains list of courses
@@ -587,11 +606,20 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
     );
   })
   
+  ipcMain.handle("openUpdateQuestion",(event,args)=>{
+
+    mainWindow.loadURL(
+      isDev
+        ? 'http://localhost:3000/UpdateQuestion?course_id='+args 
+        : `file://${path.join(__dirname, '../build/index.html')}`
+    );
+  })
+
   ipcMain.handle("goBack",()=>{
     mainWindow.webContents.goBack()
   })
 
-  ipcMain.handle("generateTex",async (event,args)=>{
+  ipcMain.handle("generateTex",(event,args)=>{
 
 
     const MetaData = args.MetaData
@@ -833,7 +861,7 @@ ipcMain.handle("getCourseFromID",async (event,args)=>{
 })
 
 
-ipcMain.handle('getQuestions',(events,args)=>{
+ipcMain.handle('getQuestions',async (events,args)=>{
 
   const CourseID = args.course_id
 

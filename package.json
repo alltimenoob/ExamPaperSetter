@@ -12,6 +12,7 @@
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
     "autoprefixer": "^10.4.8",
+    "cross-env": "^7.0.3",
     "electron-is-dev": "^2.0.0",
     "moment": "^2.29.4",
     "pdfjs-dist": "2.15.349",
@@ -28,7 +29,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "start-react": "react-scripts start",
+    "start-react": "cross-env BROWSER=none react-scripts start",
     "build-react": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -51,7 +52,7 @@
       "src/*",
       "node_modules/**/*"
     ],
-    "directories":{
+    "directories": {
       "buildResources": "assets"
     }
   },

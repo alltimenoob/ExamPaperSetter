@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld('api', {
 
   openGenereatePaper : (args) => ipcRenderer.invoke('openGenereatePaper',args), // Open New Course Window
 
+  openManageQuestion : (args) => ipcRenderer.invoke('openManageQuestion',args), // Open New Course Window
+  
+  openModifyQuestion : (args) => ipcRenderer.invoke('openModifyQuestion',args), // Open New Course Window
+
   updateCourseWindow : (args) => ipcRenderer.invoke('updateCourseWindow',args), // Update Course Window
 
   updateCourse : (args) => ipcRenderer.invoke('updateCourse',args), // Update Course

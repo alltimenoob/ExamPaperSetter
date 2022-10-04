@@ -12,3 +12,9 @@
 * Pull Request After Entire Functionality Implemented
 * Syncronize With The Main Branch (Master)
 
+# Prerequisite
+1. pdflatex 
+2.
+```
+tlmgr install geometry exam amsmath stackengine enumitem
+```
