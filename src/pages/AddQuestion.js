@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useLocation } from "react-router-dom";
 
 export default function AddQuestion() {
-  
+
   const location = useLocation()
 
   const CourseID = location.state
@@ -36,7 +36,7 @@ export default function AddQuestion() {
 
   const [SelectedCOList, setSelectedCOList] = useState(null);
   const [SelectedUnit, setSelectedUnit] = useState(null);
-  const [SelectedImage, setSelectedImage] = useState("");
+  const [SelectedImage, setSelectedImage] = useState(null)
   const [ShowImage, setShowImage] = useState(false);
 
   useEffect(() => {
@@ -209,34 +209,34 @@ export default function AddQuestion() {
               value.question_type_id.toString() === SelectedType.toString()
             );
           }) !== undefined && (
-            <div className="grid w-full grid-flow-col grid-cols-6">
-              {Options.map((value, index) => {
-                return (
-                  <input
-                    type="text"
-                    key={index}
-                    value={value.value}
-                    className="TextBox mb-2 w-full"
-                    onChange={(event) => {
-                      console.log(Options);
-                      const temp = [...Options];
-                      temp[index] = { value: event.currentTarget.value };
-                      setOptions(temp);
-                    }}
-                    placeholder={"Option " + String.fromCharCode(index + 65)}
-                  />
-                );
-              })}
+              <div className="grid w-full grid-flow-col grid-cols-6">
+                {Options.map((value, index) => {
+                  return (
+                    <input
+                      type="text"
+                      key={index}
+                      value={value.value}
+                      className="TextBox mb-2 w-full"
+                      onChange={(event) => {
+                        console.log(Options);
+                        const temp = [...Options];
+                        temp[index] = { value: event.currentTarget.value };
+                        setOptions(temp);
+                      }}
+                      placeholder={"Option " + String.fromCharCode(index + 65)}
+                    />
+                  );
+                })}
 
-              <AiFillPlusCircle
-                className="m-auto h-[28px] text-primary cursor-pointer"
-                onClick={() => {
-                  if ([...Options].length < 6)
-                    setOptions([...Options, { value: "" }]);
-                }}
-              />
-            </div>
-          )}
+                <AiFillPlusCircle
+                  className="m-auto h-[28px] text-primary cursor-pointer"
+                  onClick={() => {
+                    if ([...Options].length < 6)
+                      setOptions([...Options, { value: "" }]);
+                  }}
+                />
+              </div>
+            )}
 
           <input
             type="number"
@@ -305,7 +305,7 @@ export default function AddQuestion() {
                     TypeList.find((value) => {
                       return (
                         value.question_type_id.toString() ===
-                          SelectedType.toString() &&
+                        SelectedType.toString() &&
                         value.question_type_name === "MCQ"
                       );
                     }) !== undefined,
@@ -320,11 +320,16 @@ export default function AddQuestion() {
                   }),
                   question_image: SelectedImage,
                 };
-                console.log(args);
 
-                window.api.insertQuestion(args);
 
-                toast("Question Added Successfully");
+
+                const show = async () => {
+                  const result = await window.api.insertQuestion(args)
+                  toast(result.error.toString())
+                }
+
+                show()
+
               }}
             >
               {" "}
@@ -349,7 +354,7 @@ export default function AddQuestion() {
         bodyClassName="toastBody"
         transition={Slide}
         position="bottom-center"
-        autoClose={500}
+        autoClose={1000}
         hideProgressBar={true}
         closeOnClick
         rtl={false}

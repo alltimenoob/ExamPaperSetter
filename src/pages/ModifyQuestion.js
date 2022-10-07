@@ -1,25 +1,24 @@
 import TitleBar from "../components/TitleBar";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 import { AiFillPlusCircle } from "react-icons/ai";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { default as Select, components } from "react-select";
-import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ContextMenu from "../components/ContextMenu";
 
 export default function ModifyQuestion() {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  console.log(location.state);
-
-  //const QuestionID = location.state.value;
+  const QuestionID = location.state.value;
   const CourseID = location.state.course_id;
 
   const [SelectedType, setSelectedType] = useState(
     location.state.question_type_id
   );
   const [Options, setOptions] = useState(
-    location.state.mcqs === undefined
+    location.state.mcqs.length === 0
       ? [{ label: "", id: 0 }]
       : location.state.mcqs
   );
@@ -39,10 +38,11 @@ export default function ModifyQuestion() {
     label: location.state.unit_name,
     value: location.state.unit_id,
   });
-  const [SelectedImage, setSelectedImage] = useState(
-    location.state.question_image
-  );
+  const [SelectedImage, setSelectedImage] = useState(location.state.question_image);
   const [ShowImage, setShowImage] = useState(false);
+
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
 
   useEffect(() => {
     if (location.state === (undefined || null)) return;
@@ -65,6 +65,7 @@ export default function ModifyQuestion() {
         setCourseOutcomeList(
           values[1].cos.map((value) => {
             return {
+              course_outcomes_number: value.course_outcomes_number,
               label: value.course_outcomes_description,
               value: value.course_outcomes_id,
             };
@@ -89,7 +90,7 @@ export default function ModifyQuestion() {
         window.api.showDialog(options);
         window.api.goBack();
       });
-  }, [CourseID,location.state]);
+  }, [CourseID, location.state]);
 
   const component = (props) => {
     return (
@@ -106,16 +107,68 @@ export default function ModifyQuestion() {
     );
   };
 
+  var Change = false;
+
+  const checkChange = () => {
+    const current = {
+      question_type_id: SelectedType,
+      marks: Marks ? Marks : 0,
+      course_id: CourseID,
+      taxonomy_id: Taxonomy,
+      unit_id: SelectedUnit.value,
+      question_image: null,
+      cource_outcomes: SelectedCOList,
+      mcqs: Options,
+      value: QuestionID,
+      label: Question,
+    };
+
+    const prev = JSON.parse(JSON.stringify(location.state));
+
+    delete prev.taxonomy_letter;
+    delete prev.taxonomy_name;
+    delete prev.unit_description;
+    delete prev.unit_name;
+    delete prev.question_type_name;
+
+    const val = JSON.stringify(current) === JSON.stringify(prev);
+    Change = !val;
+    return val;
+  };
+
+  const [SelectedMCQ, setSelectedMCQ] = useState("");
+  const MCQContextMenu = [
+    <li
+      className="flex justify-center text-primary items-center cursor-pointer hover:bg-primary/10 "
+      key={0}
+      onClick={() => {
+        var temp = Options;
+        temp = Options.filter((_, i) => {
+          return i !== SelectedMCQ;
+        });
+        setOptions(temp);
+      }}
+    >
+      <span className="p-1 text-sm">Remove</span>
+    </li>,
+  ];
   if (location.state === (undefined || null)) return <div>Nothing</div>;
 
   return (
-    <div className="App">
+    <div
+      className="App"
+      onClick={() => {
+        setX(0);
+        setY(0);
+      }}
+    >
+      <ContextMenu items={MCQContextMenu} x={x} y={y}></ContextMenu>
       <TitleBar name="Modify Question" min={true} max={true} close={true} />
 
       <IoArrowBackCircleOutline
         className="fixed top-8 left-0 right-0 bottom-0 w-9 h-9 text-white ml-1 mr-1"
         onClick={() => {
-          window.api.goBack();
+          navigate('/ManageQuestions', { state: { course_id: CourseID, message: null } })
         }}
       />
 
@@ -126,7 +179,7 @@ export default function ModifyQuestion() {
               className="TextBox w-full "
               value={SelectedType}
               onChange={(event) => {
-                setSelectedType(event.currentTarget.value);
+                setSelectedType(parseInt(event.currentTarget.value));
               }}
               id="types"
             >
@@ -144,7 +197,7 @@ export default function ModifyQuestion() {
               id="types"
               value={Taxonomy}
               onChange={(event) => {
-                setTaxonomy(event.currentTarget.value);
+                setTaxonomy(parseInt(event.currentTarget.value));
               }}
             >
               {TaxonomyList.map((value, index) => {
@@ -208,43 +261,55 @@ export default function ModifyQuestion() {
               value.question_type_id.toString() === SelectedType.toString()
             );
           }) !== undefined && (
-            <div className="grid w-full grid-flow-col grid-cols-6">
-              {Options.map((value, index) => {
-                return (
-                  <input
-                    type="text"
-                    key={index}
-                    value={value.label}
-                    className="TextBox mb-2 w-full"
-                    onChange={(event) => {
-                      const temp = [...Options];
-                      temp[index] = {
-                        label: event.currentTarget.value,
-                        id: index,
-                      };
-                      setOptions(temp);
-                    }}
-                    placeholder={"Option " + String.fromCharCode(index + 65)}
-                  />
-                );
-              })}
+              <div className="grid w-full grid-flow-col grid-cols-6">
+                {Options.map((value, index) => {
+                  return (
+                    <input
+                      type="text"
+                      key={index}
+                      id={index}
+                      value={value.label}
+                      className="TextBox mb-2 w-full"
+                      onChange={(event) => {
+                        const temp = [...Options];
+                        temp[index] = {
+                          label: event.currentTarget.value,
+                          id: index,
+                        };
+                        setOptions(temp);
+                      }}
+                      onContextMenu={(event) => {
+                        setSelectedMCQ(parseInt(event.target.id));
 
-              <AiFillPlusCircle
-                className="m-auto h-[28px] text-primary cursor-pointer"
-                onClick={() => {
-                  if ([...Options].length < 6)
-                    setOptions([...Options, { value: "" }]);
-                }}
-              />
-            </div>
-          )}
+                        if (event.pageX + 120 > window.innerWidth) {
+                          setX(event.pageX - 120);
+                        } else {
+                          setX(event.pageX);
+                        }
+
+                        setY(event.pageY);
+                      }}
+                      placeholder={"Option " + String.fromCharCode(index + 65)}
+                    />
+                  );
+                })}
+
+                <AiFillPlusCircle
+                  className="m-auto h-[28px] text-primary cursor-pointer"
+                  onClick={() => {
+                    if ([...Options].length < 6)
+                      setOptions([...Options, { label: "" }]);
+                  }}
+                />
+              </div>
+            )}
 
           <input
             type="number"
             className="TextBox w-full"
             value={Marks}
             onChange={(event) => {
-              setMarks(event.currentTarget.value);
+              setMarks(parseInt(event.currentTarget.value));
             }}
             placeholder="Enter Marks"
           />
@@ -295,10 +360,99 @@ export default function ModifyQuestion() {
           )}
 
           <div className="flex w-full gap-2 justify-center items-center">
-          {/* FIX THIS ✌👀 */}  <button className="Button mt-5 flex-1">Update</button>
             <button
-              className="Button mt-5 flex-1"
+              className={`Button mt-5 flex-1 ${checkChange() ? " bg-primary/60 hover:shadow-none" : ""
+                }`}
               onClick={() => {
+                if (!Change) return;
+
+                const args = {
+                  question_id: QuestionID,
+                  course_id: CourseID,
+                  question_text: Question,
+                  question_type_id: SelectedType,
+                  isMCQ:
+                    TypeList.find((value) => {
+                      return (
+                        value.question_type_id.toString() ===
+                        SelectedType.toString() &&
+                        value.question_type_name === "MCQ"
+                      );
+                    }) !== undefined,
+                  marks: Marks,
+                  options: Options.map((value) => {
+                    return value.label;
+                  }),
+                  taxonomy_id: Taxonomy,
+                  unit_id: parseInt(SelectedUnit.value),
+                  cource_outcome_ids: SelectedCOList.map((value) => {
+                    return value.value;
+                  }),
+                  question_image: SelectedImage,
+                };
+
+                var isEmpty = Object.values(args).includes(undefined || "");
+                isEmpty =
+                  isEmpty ||
+                  args.cource_outcome_ids.length === 0 ||
+                  (args.isMCQ
+                    ? (Object.values(args.options).includes("") || args.options.length === 0)
+                    : false);
+
+                if (isEmpty) {
+                  const options = {
+                    window: "mainWindow",
+                    options: {
+                      type: "error",
+                      buttons: ["Cancel"],
+                      title: "Some Error Occured",
+                      message: "There are some missing fields!",
+                      detail:
+                        "Please fill all the required data like course outcomes, units, mcqs options(if selected)",
+                    },
+                  };
+
+                  const result = async () => {
+                    return await window.api.showDialog(options)
+                  }
+
+                  result();
+                  return;
+                }
+
+                const callback = async () => {
+                  const result = await window.api.updateQuestion(args);
+
+                  result
+                    ? navigate("/ManageQuestions", {
+                      state: {
+                        course_id: CourseID,
+                        message: result.error.toString(),
+                      },
+                    })
+                    : console.log("wrong");
+
+                };
+
+                callback();
+              }}
+            >
+              Update
+            </button>
+
+            <button
+              className={`Button mt-5 flex-1 ${Question.replaceAll(" ", "") ===
+                location.state.label.replaceAll(" ", "")
+                ? " bg-primary/60 hover:shadow-none"
+                : ""
+                }`}
+              onClick={() => {
+                if (
+                  Question.replaceAll(" ", "") ===
+                  location.state.label.replaceAll(" ", "")
+                )
+                  return;
+
                 const args = {
                   course_id: CourseID,
                   question_text: Question,
@@ -307,7 +461,7 @@ export default function ModifyQuestion() {
                     TypeList.find((value) => {
                       return (
                         value.question_type_id.toString() ===
-                          SelectedType.toString() &&
+                        SelectedType.toString() &&
                         value.question_type_name === "MCQ"
                       );
                     }) !== undefined,
@@ -322,11 +476,20 @@ export default function ModifyQuestion() {
                   }),
                   question_image: SelectedImage,
                 };
-                console.log(args);
 
-                window.api.insertQuestion(args);
+                const show = async () => {
+                  const result = await window.api.insertQuestion(args)
+                  result
+                    ? navigate("/ManageQuestions", {
+                      state: {
+                        course_id: CourseID,
+                        message: result.error.toString(),
+                      },
+                    })
+                    : console.log("wrong");
+                }
 
-                toast("Question Added Successfully");
+                show()
               }}
             >
               Save As New
@@ -334,15 +497,7 @@ export default function ModifyQuestion() {
           </div>
         </div>
       </div>
-      <ToastContainer
-        bodyClassName="toastBody"
-        transition={Slide}
-        position="bottom-center"
-        autoClose={500}
-        hideProgressBar={true}
-        closeOnClick
-        rtl={false}
-      />
+
     </div>
   );
 }

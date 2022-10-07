@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld('api', {
 
   generateTex : args => ipcRenderer.invoke('generateTex',args),
 
+  deleteQuestion : args => ipcRenderer.invoke('deleteQuestion',args),
+
+  updateQuestion : args => ipcRenderer.invoke('updateQuestion',args),
+  
   saveFile : args => ipcRenderer.invoke('saveFile',args),
 
   getFile : args => ipcRenderer.invoke('getFile',args),

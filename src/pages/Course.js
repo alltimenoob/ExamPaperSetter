@@ -18,8 +18,6 @@ export default function Course() {
   const [Course, SetCourse] = useState({});
   const CourseID = location.state;
 
-  
-
   useEffect(() => {
     async function getData() {
       const data = await window.api.getCourseFromID(CourseID);
@@ -27,9 +25,7 @@ export default function Course() {
     }
 
     getData();
-
-    
-  },[CourseID]);
+  }, [CourseID]);
 
   return (
     <div className="App">
@@ -76,7 +72,9 @@ export default function Course() {
           <div
             className="flex pt-2 pb-2 text-[12px] items-center justify-start text-white hover:bg-primaryDark"
             onClick={() => {
-              navigate("/ManageQuestions", { state: CourseID });
+              navigate("/ManageQuestions", {
+                state: { course_id: CourseID, updated: false },
+              });
             }}
           >
             <BsFillPatchQuestionFill className="w-9 h-9 p-[2px] text-white ml-1 mr-1" />

@@ -3,52 +3,82 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 
 export default function QuestionCard(props) {
-  
-  const navigate = useNavigate('')
-  
+  const navigate = useNavigate("");
+
   if (props.data.cource_outcomes === undefined) return <p></p>;
 
   return (
     <div
-      key={props.index}
+      key={props.data.value}
       className="relative  m-2  flex border-2 rounded-md
          p-3 flex-col items-center justify-around bg-primary text-white
          text-[14px] "
     >
       <BiEdit
         onClick={() => {
-          const cource_outcomes = props.data.cource_outcomes.map((value)=>{
-            
-            value.label = value.course_outcomes_description
-            value.value = value.course_outcomes_id
+          const cource_outcomes = props.data.cource_outcomes.map((value) => {
+            value.label = value.course_outcomes_description;
+            value.value = value.course_outcomes_id;
 
-            delete value.course_outcomes_description
-            delete value.course_outcomes_id
+            delete value.course_outcomes_description;
+            delete value.course_outcomes_id;
 
-            return value
+            return value;
+          });
+          if (props.data.mcqs !== undefined) {
+            props.data.mcqs = props.data.mcqs.map((value) => {
+              value.label = value.option_text;
+              value.id = value.mcq_option_id;
 
-          })
-          if(props.data.mcqs !== undefined) 
-          {
-            props.data.mcqs = props.data.mcqs.map((value)=>{
-              
-              value.label = value.option_text
-              value.id = value.mcq_option_id
+              delete value.option_text;
+              delete value.mcq_option_id;
+              delete value.question_id;
 
-              delete value.option_text
-              delete value.mcq_option_id
-              delete value.question_id
-
-              return value
-
-            })
+              return value;
+            });
           }
-          props.data.cource_outcomes = cource_outcomes
-          navigate('/ModifyQuestion',{"state":props.data})
+          props.data.cource_outcomes = cource_outcomes;
+
+          navigate("/ModifyQuestion", {
+            state: props.data,
+          });
         }}
         className="absolute top-3 right-5 w-[25px] h-[25px] hover:text-green-200 cursor-pointer"
       />
-      <RiDeleteBin5Line className="absolute top-12 right-5 w-[25px] h-[25px] hover:text-green-200 cursor-pointer" />
+
+      <RiDeleteBin5Line
+        id={props.data.value}
+        className="absolute top-12 right-5 w-[25px] h-[25px] hover:text-green-200 cursor-pointer"
+        onClick={(event) => {
+          const options = {
+            window: "mainWindow",
+            options: {
+              type: "warning",
+              buttons: ["Ok", "Cancel"],
+              title: "Alert",
+              message: "Are you sure?",
+              detail:
+                "Selected question will be deleted. Press cancel to prevent the deletion.",
+            },
+          };
+
+          const callback = async (id) => {
+            const result = await window.api.showDialog(options);
+
+            if (result.response === 0) {
+              const result = await window.api.deleteQuestion(id);
+
+              if (result) {
+                props.callback(parseInt(id), "delete");
+              }
+            }
+
+            /**/
+          };
+
+          callback(event.currentTarget.id);
+        }}
+      />
 
       <span className="self-start font-bold  text-start m-2 mr-10">
         {props.data.label}

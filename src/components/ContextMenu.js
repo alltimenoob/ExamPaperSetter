@@ -4,8 +4,9 @@ function ContextMenu(props) {
     props.x !== 0 && (
       <ul
         style={{ top: props.y + "px", left: props.x + "px" }}
-        className="absolute z-100 border-2 w-[120px] bg-white transition-all"
+        className="fixed z-[200] border-2 w-[120px] bg-white transition-all"
       >
+        {console.log("Haha")}
         {props.items}
       </ul>
     )
