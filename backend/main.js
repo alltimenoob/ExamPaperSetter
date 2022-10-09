@@ -5,9 +5,14 @@ const fs = require("fs");
 const fsa = require("fs/promises");
 const sqlite = require("sqlite3");
 
-const updateQuestion = require("./renderer/api/updateQuestion");
-const deleteQuestion = require("./renderer/api/deleteQuestion");
-const insertQuestion = require("./renderer/api/insertQuestion");
+const updateQuestion = require("./api/updateQuestion");
+const deleteQuestion = require("./api/deleteQuestion");
+const insertQuestion = require("./api/insertQuestion");
+const getUnits = require("./api/getUnits");
+const getCourseOutcomes = require("./api/getCourseOutcomes");
+const updateCourseOutcomes = require("./api/updateCourseOutcomes");
+
+const updateUnits = require("./api/updateUnits");
 
 let mainWindow, CourseWindow;
 
@@ -97,7 +102,7 @@ process.on("uncaughtException", (error) => {
 //Database Connection And Instance
 const database = new sqlite.Database(
   isDev
-    ? path.join(path.join(app.getAppPath(), "database/database.sqlite"))
+    ? path.join(path.join(app.getAppPath(), "database/database.db"))
     : path.join(process.resourcesPath, "database/qwesda"),
   (err) => {
     if (err) console.log("Database Error");
@@ -352,23 +357,7 @@ ipcMain.handle("setInstituteMetaData", (event, args) => {
 });
 
 //Retrive units of perticuler course
-ipcMain.handle("getUnits", (event, args) => {
-  const getUnitsQuery = `SELECT * FROM unit WHERE course_id='${args}'`;
-  const units = [];
 
-  return new Promise((resolve, reject) => {
-    database.each(getUnitsQuery, (error, row) => {
-      if (error != null) reject({ statusCode: 0, errorMessage: error });
-
-      units.push({
-        course_id: row.course_id,
-        unit_id: row.unit_id,
-        unit_name: row.unit_name,
-      });
-      resolve({ statusCode: 1, units: units });
-    });
-  });
-});
 
 ipcMain.handle("s", (event, args) => {
   const getUnitsQuery = `SELECT * FROM question WHERE course_id='${args}'`;
@@ -751,7 +740,7 @@ ipcMain.handle("generateTex", (event, args) => {
 
 
 
-ipcMain.handle("getQuestions", async (events, args) => {
+ipcMain.handle("getQuestions", async (_, args) => {
   const CourseID = args.course_id;
 
   let sql = `SELECT * FROM question INNER JOIN taxonomy ON taxonomy.taxonomy_id = question.taxonomy_id INNER JOIN unit 
@@ -813,5 +802,26 @@ ipcMain.handle("deleteQuestion", async (_, args) => {
 
 ipcMain.handle("insertQuestion", async (_, args) => {
   const result = await insertQuestion(args, database);
-  return result
+  console.log(result)
+  return result;
+});
+
+ipcMain.handle("getUnits", async (_, args) => {
+  const result = await getUnits(args, database);
+  return result;
+});
+
+ipcMain.handle("updateUnits", async (_, args) => {
+  const result = await updateUnits(args, database);
+  return result;
+});
+
+ipcMain.handle("getCourseOutcomes", async (_, args) => {
+  const result = await getCourseOutcomes(args, database);
+  return result;
+});
+
+ipcMain.handle("updateCourseOutcomes", async (_, args) => {
+  const result = await updateCourseOutcomes(args, database);
+  return result;
 });

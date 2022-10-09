@@ -39,23 +39,26 @@ function updateQuestion(args, db) {
         "DELETE FROM mcq_option WHERE question_id = ? "
       );
 
-      stmt.run(args.question_id, (_) => { if (_) resolve({ error: "❌ MCQ Options Could Not Be Deleted ", status: -1 }) });
+      stmt.run(args.question_id, (_) => {
+        if (_) resolve({ error: "❌ MCQ Options Could Not Be Deleted ", status: -1 });
+        if (!args.isMCQ) resolve({ error: "✅ Question Updated Successfully", status: 1 })
+      });
 
       if (args.isMCQ) {
-
         args.options.forEach((value) => {
           stmt = db.prepare(
             "INSERT INTO mcq_option(question_id,option_text) VALUES(?,?)"
           );
 
-          stmt.run(args.question_id, value, (_) => { if (_) resolve({ error: "❌ MCQ Options Could Not Be Inserted ", status: -1 }) });
+          stmt.run(args.question_id, value, (_) => {
+            if (_) resolve({ error: "❌ MCQ Options Could Not Be Inserted ", status: -1 }); else
+              resolve({ error: "✅ Question Updated Successfully", status: 1 })
+          });
         })
       }
 
 
       stmt.finalize();
-
-      resolve({ error: "✅ Question Updated Successfully", status: 1 })
     });
   })
 
