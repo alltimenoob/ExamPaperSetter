@@ -41,24 +41,24 @@ export default function AddQuestion() {
 
   useEffect(() => {
     const units = window.api.getUnits(CourseID);
-    const co = window.api.getCOs(CourseID);
+    const co = window.api.getCourseOutcomes(CourseID);
     const taxonomy = window.api.getTaxonomy();
     const types = window.api.getQuestionTypes();
 
     Promise.all([units, co, taxonomy, types])
       .then((values) => {
         setUnitsList(
-          values[0].units.map((value) => {
+          values[0].data.map((value, i) => {
             return {
-              label: "Unit : " + value.unit_name,
+              label: `${i + 1} - ` + value.unit_name,
               value: value.unit_id.toString(),
             };
           })
         );
         setCourseOutcomeList(
-          values[1].cos.map((value) => {
+          values[1].data.map((value, i) => {
             return {
-              label: "CO : " + value.course_outcomes_description,
+              label: `${i + 1} - ` + value.course_outcomes_description,
               value: value.course_outcomes_id,
             };
           })
@@ -68,7 +68,8 @@ export default function AddQuestion() {
         setTypeList(values[3].question_types);
         setSelectedType(values[3].question_types[0].question_type_id);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error)
         const options = {
           window: "CourseWindow",
           options: {
@@ -82,7 +83,7 @@ export default function AddQuestion() {
         };
 
         window.api.showDialog(options);
-        window.api.goBack();
+        //window.api.goBack();
       });
   }, [CourseID]);
 
@@ -197,7 +198,6 @@ export default function AddQuestion() {
             className="TextBox w-full "
             value={Question}
             onChange={(event) => {
-              console.log(event.currentTarget.value);
               setQuestion(event.currentTarget.value);
             }}
             placeholder="Enter Question"

@@ -14,7 +14,7 @@ import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 /* ------- */
 
-import QuestionFilter from "../components/QuestionFilter";
+import { QuestionFilter } from "../components/Question";
 import { useLocation } from "react-router-dom";
 
 export default function GeneratePaper() {
@@ -336,7 +336,7 @@ export default function GeneratePaper() {
                   placeholder="Enter End Time"
                 />
               </div>
-              
+
               <input
                 type="number"
                 onWheel={(event) => {
@@ -406,11 +406,10 @@ export default function GeneratePaper() {
           <div className="w-full h-screen  ">
             <span className="self-start text-xl"> Questions </span>
             <span
-              className={`fixed top-10 right-4 self-start text-xl ${
-                TotalMarks >= CurrentMarks
-                  ? "bg-primary "
-                  : "bg-red-500 animate-[pulse_1s_ease-in_infinite] "
-              } p-1  text-white font-bold rounded`}
+              className={`fixed top-10 right-4 self-start text-xl ${TotalMarks >= CurrentMarks
+                ? "bg-primary "
+                : "bg-red-500 animate-[pulse_1s_ease-in_infinite] "
+                } p-1  text-white font-bold rounded`}
             >
               Total Marks {CurrentMarks}
             </span>

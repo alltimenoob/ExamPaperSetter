@@ -73,7 +73,9 @@ export default function Course() {
             className="flex pt-2 pb-2 text-[12px] items-center justify-start text-white hover:bg-primaryDark"
             onClick={() => {
               navigate("/ManageQuestions", {
-                state: { course_id: CourseID, updated: false },
+                state: {
+                  course_id: CourseID, message: null
+                },
               });
             }}
           >
@@ -85,15 +87,11 @@ export default function Course() {
           <div
             className="flex pt-2 pb-2 text-[12px] items-center justify-start text-white hover:bg-primaryDark"
             onClick={() => {
-              window.api.openGenereatePaper(CourseID);
+              navigate("/ManageUnits", { state: CourseID })
             }}
           >
             <BsInboxesFill
-              className="w-9 h-9 p-[4px] text-white ml-1 mr-1"
-              onClick={() => {
-                window.api.openGenereatePaper(CourseID);
-              }}
-            />
+              className="w-9 h-9 p-[4px] text-white ml-1 mr-1" />
 
             <span>Manage Units</span>
           </div>
@@ -101,7 +99,7 @@ export default function Course() {
           <div
             className="flex pt-2 pb-2 text-[12px] items-center justify-start text-white hover:bg-primaryDark"
             onClick={() => {
-              window.api.openGenereatePaper(CourseID);
+              navigate("/ManageCourseOutcomes", { state: CourseID })
             }}
           >
             <GiWhiteBook className="w-9 h-9 p-[2px] text-white ml-1 mr-1" />

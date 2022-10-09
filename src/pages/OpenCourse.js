@@ -29,7 +29,7 @@ export default function OpenCourse() {
     window.api.reload(() => {
       fetch();
     });
-    
+
   }, [navigate]);
 
   const openNewCourse = async () => {
@@ -147,7 +147,7 @@ export default function OpenCourse() {
                     setY(event.pageY);
                   }}
                   onClick={(event) => {
-                    navigate("/Course", { state: event.currentTarget.id });
+                    navigate("/CourseHome", { state: event.currentTarget.id });
                   }}
                 >
                   <BiBookContent className="h-[60px] w-[25px]" />

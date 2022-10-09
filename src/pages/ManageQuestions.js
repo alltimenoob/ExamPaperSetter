@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TitleBar from "../components/TitleBar";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
-import QuestionsList from "../components/QuestionsList";
+import { QuestionsList, QuestionFilter } from "../components/Question";
 import "react-toastify/dist/ReactToastify.css";
 import { GoSettings } from "react-icons/go";
-import QuestionFilter from "../components/QuestionFilter";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, Slide, toast } from "react-toastify";
 
 export default function ManageQuestions() {
   const location = useLocation();
   const navigate = useNavigate();
+
+
+  console.log(location.state);
 
   const CourseID = location.state.course_id;
 
@@ -22,12 +24,11 @@ export default function ManageQuestions() {
 
   const [ShowFilter, setShowFilter] = useState(false);
 
-  const [Loading, setLoading] = useState(false);
+
+  const Loading = useRef(false);
 
   useEffect(() => {
-    setLoading(false);
     const questions = window.api.getQuestions({ course_id: CourseID });
-
     questions
       .then((result) => {
         result = result.map((value) => {
@@ -38,17 +39,17 @@ export default function ManageQuestions() {
 
           return value;
         });
+        console.log(result)
 
         setFullQuestionsList(result);
         setFilteredList(result);
       })
-      .then(() => setLoading(true));
-  }, [CourseID]);
+  }, [CourseID, Loading]);
 
   useEffect(() => {
-    if (location.state.message == null) return
-    console.log(location.state.message)
+    if (location.state.message === null) return
     toast(location.state.message)
+    Loading.current = !Loading.current
     location.state.message = null
   })
 
@@ -94,11 +95,9 @@ export default function ManageQuestions() {
   };
 
   const QuestionsListCallback = (index, type) => {
-    console.log("Yes i am getting called ❤️❤️");
     if (type === "delete") {
       var temp = FilteredList;
       temp = temp.filter((value) => {
-        console.log(typeof index, typeof value.value);
         return value.value !== index;
       });
       setFilteredList(temp);
@@ -120,7 +119,7 @@ export default function ManageQuestions() {
       <IoArrowBackCircleOutline
         className="fixed top-8 left-0 right-0 bottom-0 w-9 h-9 text-white ml-1 mr-1"
         onClick={() => {
-          navigate("/Course", { state: CourseID });
+          navigate("/CourseHome", { state: CourseID });
         }}
       />
 

@@ -48,14 +48,14 @@ export default function ModifyQuestion() {
     if (location.state === (undefined || null)) return;
 
     const units = window.api.getUnits(CourseID);
-    const co = window.api.getCOs(CourseID);
+    const co = window.api.getCourseOutcomes(CourseID);
     const taxonomy = window.api.getTaxonomy();
     const types = window.api.getQuestionTypes();
 
     Promise.all([units, co, taxonomy, types])
       .then((values) => {
         setUnitsList(
-          values[0].units.map((value) => {
+          values[0].data.map((value) => {
             return {
               label: value.unit_name,
               value: value.unit_id,
@@ -63,7 +63,7 @@ export default function ModifyQuestion() {
           })
         );
         setCourseOutcomeList(
-          values[1].cos.map((value) => {
+          values[1].data.map((value) => {
             return {
               course_outcomes_number: value.course_outcomes_number,
               label: value.course_outcomes_description,
