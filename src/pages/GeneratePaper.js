@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { default as Select, components } from "react-select";
 import { AiFillPlusCircle } from "react-icons/ai";
 import { GoSettings } from "react-icons/go";
-import { IoIosPaper } from "react-icons/io";
 
 /* -- For PDF -- */
 import { Worker } from "@react-pdf-viewer/core";
@@ -53,6 +52,8 @@ export default function GeneratePaper() {
 
   const [QuestionsList, setQuestionsList] = useState([{}]);
   const [FilteredList, setFilteredList] = useState([{}]);
+  const [SelectedList, setSelectedList] = useState([{}]);
+
   const [Instructions, setInstructions] = useState([]);
 
   const [CurrentMarks, setCurrentMarks] = useState(0);
@@ -76,16 +77,17 @@ export default function GeneratePaper() {
       var questions = await window.api.getQuestions({ course_id: CourseID });
 
       questions = questions.map((value) => {
-        value.value = value.question_id;
-        value.label = value.question_text;
-        delete value.question_id;
-        delete value.question_text;
+        value.value = value.question_id
+        value.label = value.question_text
 
+        delete value.question_id
+        delete value.question_text
+        value.subq = []
         return value;
       });
-
       setQuestionsList(questions);
       setFilteredList(questions);
+      setSelectedList(questions)
     };
 
     getQuestions();
@@ -100,8 +102,6 @@ export default function GeneratePaper() {
 
   const calculateFilter = (filterList) => {
     setSelectedFilter(filterList);
-
-    console.log(filterList);
 
     var temp = QuestionsList;
 
@@ -132,10 +132,141 @@ export default function GeneratePaper() {
     }
 
     setFilteredList(temp);
+    handleSelectedQuestions([...QDetails],temp)
   };
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
   const [file, setFile] = useState(null);
+
+  const handleSelectedQuestions = (tempQDetails,tempFilteredList = FilteredList ) =>{
+    let selectedQuestions = []
+    tempQDetails.forEach(question => {
+      if(question.subq.length > 0)
+      {
+        question.subq.forEach(question => {
+          if(question.subq.length > 0)
+          {
+            question.subq.forEach(question=>{
+              if(question.value!==undefined)
+              selectedQuestions.push(question.value)
+            })
+          }
+          else
+          {
+            if(question.value!==undefined)
+            selectedQuestions.push(question.value)
+          }
+        })
+      }
+      else
+      {
+        if(question.value!==undefined)
+        selectedQuestions.push(question.value)
+      }
+    });
+    setSelectedList([...tempFilteredList].filter(question=>!selectedQuestions.includes(question.value)))
+  }
+
+  const calculateMarks = (tempQDetails) => {
+    setCurrentMarks(tempQDetails.reduce((accumlator,question)=>accumlator+question.text.marks,0))
+  }
+
+  const handleRemove = (id,marks) =>{
+    let tempQDetails = [...QDetails]
+    switch(Object.keys(id).length){
+      case 1:
+        tempQDetails = tempQDetails.filter((_,i)=> i !== id.mainIterator)
+        break;
+      case 2:
+        tempQDetails[id.mainIterator].text.marks -= marks
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.filter((_,i)=> i !== id.subIterator)
+        break;
+      case 3:
+        tempQDetails[id.mainIterator].text.marks -= marks
+        tempQDetails[id.mainIterator].subq[id.subIterator].text.marks -= marks
+        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.filter((_,i)=> i !== id.sub2xIterator)
+        break;
+      default: break;
+    }
+    calculateMarks(tempQDetails)
+    setQDetails(tempQDetails)
+  }
+
+  const handleQuestionChange = (value,id)=>{
+    let tempQDetails = [...QDetails]
+    console.log(value)
+    switch(Object.keys(id).length){
+      case 1:
+        tempQDetails = tempQDetails.map((main,i)=>{ 
+          if(i === id.mainIterator)
+          main = {...value,text:{ 
+            label :value.label,
+            value : value.value,
+            marks : value.marks
+          }}
+          
+          return main
+        })
+        break;
+      case 2:
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub,i) =>{
+          if(i === id.subIterator)
+          sub = {...value,text:{ 
+            label : value.label,
+            value : value.value,
+            marks : value.marks
+          }}
+
+          return sub
+        })
+        tempQDetails[id.mainIterator].text.marks += value.marks
+
+        break;
+      case 3:
+        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.map((sub2x,i)=> {
+          if (i === id.sub2xIterator)
+          sub2x = {...value,text:{ 
+            label :value.label,
+            value : value.value,
+            marks : value.marks
+          }}
+          return sub2x
+        })
+        
+        tempQDetails[id.mainIterator].text.marks += value.marks
+        tempQDetails[id.mainIterator].subq[id.subIterator].text.marks += value.marks
+        break;
+      default: break;
+    }
+    console.log(tempQDetails)
+
+    calculateMarks(tempQDetails)
+    handleSelectedQuestions(tempQDetails)
+    setQDetails(tempQDetails)
+  }
+
+  const handleQuestionTextChange = (value,id) =>{
+    let tempQDetails = [...QDetails]
+    console.log(value)
+    switch(Object.keys(id).length){
+      case 1:
+        tempQDetails = tempQDetails.map((main,i)=>{ 
+          if(i === id.mainIterator)
+          main = {...main,text:{...main.text,label:value}} 
+          return main
+        })
+        break
+      case 2:
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub,i) =>{
+          if(i === id.subIterator)
+          sub = {...sub,text:{...sub.text,label:value}}
+          return sub
+        })
+        break
+      default:break
+    }
+    setQDetails(tempQDetails)
+  }
 
   const component = (props) => {
     return (
@@ -404,273 +535,244 @@ export default function GeneratePaper() {
 
         {Page === "Questions" && (
           <div className="w-full h-screen  ">
-            <span className="self-start text-xl"> Questions </span>
+            <span className="absolute top-2 left-7 text-xl font-bold text-primary"> Questions </span>
             <span
-              className={`fixed top-10 right-4 self-start text-xl ${TotalMarks >= CurrentMarks
-                ? "bg-primary "
-                : "bg-red-500 animate-[pulse_1s_ease-in_infinite] "
-                } p-1  text-white font-bold rounded`}
+              className={`absolute top-2 right-28 self-start text-base z-10 ${TotalMarks >= CurrentMarks
+                ? "text-primary "
+                : "text-red-500 animate-[pulse_1s_ease-in_infinite] "
+                } p-2 font-semibold rounded`}
+
+              onClick={_ => {
+                console.log(QDetails)
+              }}
             >
               Total Marks {CurrentMarks}
             </span>
-            <div className="mt-2 w-full h-fit flex flex-col justify-center gap-2 ">
-              {QDetails.map((value, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="flex flex-col w-full items-center justify-center  border-b-primary border-2"
-                  >
-                    <div className="flex w-full justify-start items-center">
-                      <span className="ml-2 text-[16px] ">Q.{i + 1}</span>
-                      {value.showText && (
-                        <input
-                          id={"I" + i}
-                          type="text"
-                          className="TextBox m-2 w-full flex-1"
-                          value={value.text.label}
-                          onChange={(event) => {
-                            const temp = [...QDetails];
 
-                            setQDetails(
-                              temp.map((value, i) => {
-                                if ("I" + i === event.currentTarget.id) {
-                                  value.text.label = event.currentTarget.value;
-                                }
-                                return value;
-                              })
-                            );
-                          }}
-                          placeholder="Enter Question"
-                        />
-                      )}
-
-                      {!value.showText && (
-                        <span className="w-full flex-1 p-0 text-[16px] m-2 text-start ">
-                          <Select
-                            name={"Q" + i}
-                            placeholder={"Select Question"}
-                            options={FilteredList}
-                            hideSelectedOptions={true}
-                            components={{ Option: component }}
-                            onChange={(text, event) => {
-                              var temp = [...QDetails];
-                              var tempMarks = 0;
-
-                              temp = temp.map((value, i) => {
-                                if (event.name === "Q" + i) {
-                                  value.marks = text.marks;
-                                  value.text = text;
-                                }
-                                tempMarks += value.marks;
-                                return value;
-                              });
-
-                              setCurrentMarks(tempMarks);
-
-                              setQDetails(temp);
-                            }}
-                            value={value.text}
-                          />
-                        </span>
-                      )}
-
-                      <input
-                        type="checkbox"
-                        id={"T" + i}
-                        className="Button m-2 flex-2 "
-                        onClick={(event) => {
-                          const temp = [...QDetails];
-                          var tempMarks = 0;
-
-                          setQDetails(
-                            temp.map((value, i) => {
-                              if ("T" + i === event.currentTarget.id) {
-                                value.text = { label: "", value: 0, marks: 0 };
-                                value.showText = !value.showText;
-
-                                if (!value.showText) {
-                                  value.subq = [];
-                                }
-                                value.marks = 0;
-                              }
-
-                              tempMarks += parseInt(value.marks + "");
-
-                              return value;
-                            })
-                          );
-
-                          setCurrentMarks(tempMarks);
-                        }}
-                      />
-
-                      <label htmlFor={"T" + i} className="text-[16px] flex-3">
-                        Select Question
-                      </label>
+            <div className="flex flex-col mt-5">
+              {/* MAIN QUESTION 🔴 */}
+                {QDetails.map((mainQuestion,mainIterator)=>{
+                  return <div key={"main"+mainIterator} className="flex flex-col w-full shadow-md m-2 "> 
+                  <div className="text-[16px] h-full m-1 text-start flex gap-2 p-4 items-stretch justify-center ">
+                    {/* That Delete Transition Here 🚇*/}
+                    <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
+                      <p className={`flex w-full h-full items-center justify-center 
+                      text-primary  group-hover:hidden }`}>
+                      Q {mainIterator+1} </p>
+                      <p className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
+                    text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
+                    group-hover:text-white group-hover:transition-all ease-linear `} 
+                      onClick={()=>handleRemove({mainIterator},mainQuestion.text.marks)}>Delete</p>
                     </div>
-
-                    <div className="flex flex-col w-[60vw]">
-                      {value.subq.map((value, i1) => {
-                        return (
-                          <span
-                            key={i1}
-                            className="w-full p-0 text-[16px] m-2 text-start flex-1"
-                          >
-                            <Select
-                              name={i + " " + i1}
-                              placeholder={"Select Question"}
-                              options={FilteredList}
-                              hideSelectedOptions={true}
-                              components={{
-                                Option: component,
-                              }}
-                              onChange={(text, event) => {
-                                var temp = [...QDetails];
-                                var tempCurrentMarks = 0;
-
-                                temp = temp.map((value, i2) => {
-                                  var tempMarks = value.marks;
-                                  const ids = event.name.split(" ");
-
-                                  if (parseInt(ids[0]) === i2) {
-                                    const sq = [...value.subq];
-                                    sq[parseInt(ids[1])] = text;
-                                    value.subq = sq;
-                                  }
-
-                                  if (value.showText) {
-                                    tempMarks = 0;
-                                    value.subq.forEach((value) => {
-                                      tempMarks += value.marks;
-                                    });
-                                  }
-
-                                  value.marks = tempMarks;
-                                  tempCurrentMarks += value.marks;
-                                  return value;
-                                });
-
-                                setCurrentMarks(tempCurrentMarks);
-
-                                setQDetails(temp);
-                              }}
-                              value={value}
-                            />
-                          </span>
-                        );
-                      })}
-                    </div>
-                    {value.showText && (
-                      <AiFillPlusCircle
-                        className="text-primary m-2"
-                        id={"P" + i}
-                        onClick={(event) => {
-                          const temp = [...QDetails];
-                          setQDetails(
-                            temp.map((value, i) => {
-                              if (event.currentTarget.id === "P" + i) {
-                                value.subq = [
-                                  ...value.subq,
-                                  { label: "", value: "", marks: 0 },
-                                ];
-                              }
-
-                              return value;
-                            })
-                          );
-                        }}
+                    {mainQuestion.subq.length > 0 && 
+                    <input
+                      id={"main"+mainIterator}
+                      type="text"
+                      className="TextBox w-full flex-[9]"
+                      value={mainQuestion.text.label}
+                      onChange={(event) => handleQuestionTextChange(event.currentTarget.value,{mainIterator})}
+                      placeholder="Enter Question"
+                    />}
+                    {mainQuestion.subq.length < 1 && <Select
+                      name={"main"+mainIterator}
+                      className="flex-[9]"
+                      placeholder={"Select Question"}
+                      options={SelectedList}
+                      hideSelectedOptions={true}
+                      components={{
+                      Option: component,
+                      }} 
+                      value={mainQuestion.text}
+                      onChange={value=>handleQuestionChange(value,{mainIterator})}
                       />
-                    )}
+                    }
+                    <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
+                    {mainQuestion.text.marks}</p>
+                    {/* Generate New Sub Question ⚙ */}
+                    <p id={mainIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
+                        onClick={_=>{
+                            let tempQDetails = [...QDetails]
+                            let id = parseInt(_.currentTarget.id)
+                            let subq = tempQDetails[parseInt(_.currentTarget.id)].subq 
+                            tempQDetails[id] = {text:tempQDetails[id].text,subq : [...subq,{ text:{label:"",value:undefined,marks:0},subq:[]}] }
+                            tempQDetails[id].text.marks = subq.reduce((accumlator,sub)=>sub.text.marks+accumlator,0)
+                            
+                            if(tempQDetails[id].subq.length === 1){
+                                tempQDetails[id].text.label = ""
+                                calculateMarks(tempQDetails)
+                            }
+                            handleSelectedQuestions(tempQDetails)
+                            setQDetails(tempQDetails)
+                        }}> 
+                    +</p>
                   </div>
-                );
-              })}
+                {/* SUB QUESTION 🔴 */}
+                {mainQuestion.subq.map((subQuestion,subIterator)=>{
+                    return <div key={"sub"+subIterator} className="flex flex-col w-full ">
+                    <div className="text-[16px] ml-6 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                      <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
+                        <p className={`flex w-full h-full items-center justify-center 
+                        text-primary  group-hover:hidden }`}>
+                        {String.fromCharCode(subIterator+65)} </p>
+                        <p className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
+                      text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
+                      group-hover:text-white group-hover:transition-all ease-linear `}
+                      onClick={()=> handleRemove({mainIterator,subIterator},subQuestion.text.marks)}>Delete</p>
+                      </div>
+                      {subQuestion.subq.length > 0 ? 
+                      <input
+                        id={subIterator}
+                        type="text"
+                        className="TextBox w-full flex-[9]"
+                        value={subQuestion.text.label}
+                        onChange={(event) => handleQuestionTextChange(event.currentTarget.value,{mainIterator,subIterator})}
+                        placeholder="Enter Question"
+                      />
+                      :
+                      <Select
+                        className="flex-[9]"
+                        placeholder={"Select Question"}
+                        options={SelectedList}
+                        hideSelectedOptions={true}
+                        components={{
+                        Option: component,
+                        }} 
+                        value={subQuestion.text}
+                        onChange={value=>handleQuestionChange(value,{mainIterator,subIterator})}
+                        />
+                      }
+                      <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary"> 
+                      {subQuestion.text.marks}</p>
+                      {/* Generate New Sub2X Question ⚙ */}
+                      <p id={mainIterator + " " +subIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
+                          onClick={_=>{
+                              let tempQDetails = [...QDetails]
+                              let ids = _.currentTarget.id.split(" ")
+                              let mainId = parseInt(ids[0])
+                              let subId = parseInt(ids[1])                              
+                              let subsub = tempQDetails[mainId].subq[subId].subq
+                              tempQDetails[mainId].subq[subId].subq = subsub = [...subsub,{text:{label:'',value:undefined,marks:0}}]
+                              tempQDetails[mainId].subq[subId] = {text:tempQDetails[mainId].subq[subId].text,subq:subsub}
+                              tempQDetails[mainId].subq[subId].text.marks = tempQDetails[mainId].subq[subId].subq.reduce(
+                                (accumlator,sub2x)=>sub2x.text.marks + accumlator,0)
+                              tempQDetails[mainId].text.marks = tempQDetails[mainId].subq.reduce(
+                                (accumlator,sub)=> sub.text.marks + accumlator,0)
 
-              <button
-                className="w-[250px]  mb-10  self-center Button"
-                onClick={() => {
-                  const temp = [...QDetails];
-
-                  temp.push({
-                    filter: {
-                      marks: [],
-                      taxonomy: [],
-                      type: [],
-                    },
-                    marks: 0,
-                    showFilter: false,
-                    showText: true,
-                    text: { label: ``, value: -1, marks: 0 },
-                    subq: [],
-                  });
-
-                  setQDetails(temp);
-                }}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <AiFillPlusCircle /> Add New Question
-                </div>
-              </button>
-
-              <button
-                className="flex items-center gap-2 justify-center Button bg-primary text-white fixed w-[80px] h-[60px] bottom-10 right-10 "
-                onClick={() => {
-                  window.api.getCourseFromID(CourseID).then((value) => {
-                    let endTime = EndTime.split(":");
-                    let startTime = StartTime.split(":");
-
-                    if (parseInt(endTime[0]) > 12) {
-                      endTime =
-                        (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM";
-                    } else {
-                      endTime = endTime[0] + ":" + endTime[1] + " AM";
-                    }
-
-                    if (parseInt(startTime[0]) > 12) {
-                      startTime =
-                        (parseInt(startTime[0]) % 12) +
-                        ":" +
-                        startTime[1] +
-                        " PM";
-                    } else {
-                      startTime = startTime[0] + ":" + startTime[1] + " AM";
-                    }
-
-                    console.log(QDetails);
-
-                    window.api
-                      .generateTex({
-                        MetaData: {
-                          CourseCode: value.code,
-                          CourseName: value.name,
-                          TotalMarks: TotalMarks,
-                          Year: Year.label,
-                          Stream: Stream.label,
-                          AY: AY,
-                          ExamType: ExamType.label,
-                          Semester: Semester.label,
-                          Date: ExamDate.split("-").join("."),
-                          Time: startTime + " to " + endTime,
-                          Instructions: Instructions,
-                        },
-                        QuestionDetails: QDetails,
-                      })
-                      .then(() => {
-                        window.api
-                          .getFile()
-                          .then((value) => {
-                            setFile("data:application/pdf;base64," + value);
-                          })
-                          .then(() => {
-                            setPage("PDF");
-                          });
-                      });
-                  });
-                }}
-              >
-                <IoIosPaper />{" "}
-              </button>
+                              if(tempQDetails[mainId].subq[subId].subq.length === 1){
+                                tempQDetails[mainId].subq[subId].text.label = ""
+                                calculateMarks(tempQDetails)
+                              }
+                              handleSelectedQuestions(tempQDetails)
+                              setQDetails(tempQDetails)
+                          }}> 
+                      +</p>
+                    </div>
+                    {/* SUB2X QUESTION 🔴 */}
+                    {subQuestion.subq.map((sub2xQuestion,sub2xIterator)=>{
+                      return <div key={"sub"+sub2xIterator} className="flex flex-col w-full ">
+                      
+                      <div className="text-[16px] ml-10 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                        <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
+                          <p className={`flex w-full h-full items-center justify-center 
+                          text-primary  group-hover:hidden }`}>
+                          {sub2xIterator+1} </p>
+                          <p id={mainIterator + " " + subIterator + " " + sub2xIterator} className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
+                        text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
+                        group-hover:text-white group-hover:transition-all ease-linear `}
+                        onClick={ ()=> handleRemove({mainIterator,subIterator,sub2xIterator},sub2xQuestion.text.marks) }>Delete</p>
+                        </div>
+                        <Select
+                          className="flex-[9]"
+                          placeholder={"Select Question"}
+                          options={SelectedList}
+                          hideSelectedOptions={true}
+                          components={{
+                          Option: component,
+                          }}
+                          value={sub2xQuestion.text}
+                          onChange={value=>handleQuestionChange(value,{mainIterator,subIterator,sub2xIterator})}
+                          />
+                          <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary"> 
+                          {sub2xQuestion.text.marks}</p>
+                      </div>
+                      </div>
+                    })}
+                    
+                  </div>
+                  })}
+                  </div>
+                })}
+                
+                
+                  
+                {/*QDetails.map( (value,i) =>{
+                  return 
+                })*/}
+              <AiFillPlusCircle className="text-primary self-center m-2 mb-10" onClick={_=>{
+                  setQDetails([...QDetails,{text:{label:"",marks:0 , value: 0},subq:[]}])
+                }}/>
             </div>
+
+            <span
+              className="flex items-center gap-2 justify-center rounded bg-primary text-white absolute text-base font-semibold p-2 self-start top-2 right-5 hover:shadow-lg hover:shadow-primary/50 hover:transition-all ease-in-out duration-75 "
+              onClick={() => {
+                window.api.getCourseFromID(CourseID).then((value) => {
+                  let endTime = EndTime.split(":");
+                  let startTime = StartTime.split(":");
+
+                  if (parseInt(endTime[0]) > 12) {
+                    endTime =
+                      (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM";
+                  } else {
+                    endTime = endTime[0] + ":" + endTime[1] + " AM";
+                  }
+
+                  if (parseInt(startTime[0]) > 12) {
+                    startTime =
+                      (parseInt(startTime[0]) % 12) +
+                      ":" +
+                      startTime[1] +
+                      " PM";
+                  } else {
+                    startTime = startTime[0] + ":" + startTime[1] + " AM";
+                  }
+
+                  console.log(QDetails);
+
+                  window.api
+                    .generateTex({
+                      MetaData: {
+                        CourseCode: value.code,
+                        CourseName: value.name,
+                        TotalMarks: TotalMarks,
+                        Year: Year.label,
+                        Stream: Stream.label,
+                        AY: AY,
+                        ExamType: ExamType.label,
+                        Semester: Semester.label,
+                        Date: ExamDate.split("-").join("."),
+                        Time: startTime + " to " + endTime,
+                        Instructions: Instructions,
+                      },
+                      QuestionDetails: QDetails,
+                    })
+                    .then(() => {
+                      window.api
+                        .getFile()
+                        .then((value) => {
+                          setFile("data:application/pdf;base64," + value);
+                        })
+                        .then(() => {
+                          setPage("PDF");
+                        });
+                    });
+                });
+              }}
+            >
+              Generate
+            </span>
           </div>
+
         )}
       </div>
 
