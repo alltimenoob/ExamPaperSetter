@@ -2,7 +2,7 @@ import TitleBar from "../components/TitleBar";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { default as Select, components } from "react-select";
-import { AiFillPlusCircle } from "react-icons/ai";
+import { AiFillPlusCircle, AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 import { GoSettings } from "react-icons/go";
 
 /* -- For PDF -- */
@@ -22,6 +22,10 @@ export default function GeneratePaper() {
   const location = useLocation()
 
   const CourseID = location.state
+
+  const [ExamPaper, setExamPaper] = useState({
+    sections: [[],[]]
+  })
 
   const YearList = [
     { label: "First", value: 0 },
@@ -71,6 +75,7 @@ export default function GeneratePaper() {
   const [ExamType, setExamType] = useState("");
 
   const [QDetails, setQDetails] = useState([]);
+  const [CurrentSection,setCurrentSection] = useState(0)
 
   useEffect(() => {
     const getQuestions = async () => {
@@ -132,138 +137,145 @@ export default function GeneratePaper() {
     }
 
     setFilteredList(temp);
-    handleSelectedQuestions([...QDetails],temp)
   };
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
   const [file, setFile] = useState(null);
 
-  const handleSelectedQuestions = (tempQDetails,tempFilteredList = FilteredList ) =>{
+  useEffect(()=> () => {
     let selectedQuestions = []
-    tempQDetails.forEach(question => {
-      if(question.subq.length > 0)
-      {
-        question.subq.forEach(question => {
-          if(question.subq.length > 0)
-          {
-            question.subq.forEach(question=>{
-              if(question.value!==undefined)
-              selectedQuestions.push(question.value)
-            })
-          }
-          else
-          {
-            if(question.value!==undefined)
+    const tempExamPaper = {...ExamPaper}
+    tempExamPaper.sections.forEach((tempQDetails)=>{
+      tempQDetails.forEach(question => {
+        if (question.subq.length > 0) {
+          question.subq.forEach(question => {
+            if (question.subq.length > 0) {
+              question.subq.forEach(question => {
+                if (question.value !== undefined)
+                  selectedQuestions.push(question.value)
+              })
+            }
+            else {
+              if (question.value !== undefined)
+                selectedQuestions.push(question.value)
+            }
+          })
+        }
+        else {
+          if (question.value !== undefined)
             selectedQuestions.push(question.value)
-          }
-        })
-      }
-      else
-      {
-        if(question.value!==undefined)
-        selectedQuestions.push(question.value)
-      }
-    });
-    setSelectedList([...tempFilteredList].filter(question=>!selectedQuestions.includes(question.value)))
-  }
+        }
+      });
+    })
+
+
+    setSelectedList([...FilteredList].filter(question => !selectedQuestions.includes(question.value)))
+  },[QDetails,ExamPaper,FilteredList])
 
   const calculateMarks = (tempQDetails) => {
-    setCurrentMarks(tempQDetails.reduce((accumlator,question)=>accumlator+question.text.marks,0))
+    setCurrentMarks(tempQDetails.reduce((accumlator, question) => accumlator + question.text.marks, 0))
   }
 
-  const handleRemove = (id,marks) =>{
+  const handleRemove = (id, marks) => {
     let tempQDetails = [...QDetails]
-    switch(Object.keys(id).length){
+    switch (Object.keys(id).length) {
       case 1:
-        tempQDetails = tempQDetails.filter((_,i)=> i !== id.mainIterator)
+        tempQDetails = tempQDetails.filter((_, i) => i !== id.mainIterator)
         break;
       case 2:
         tempQDetails[id.mainIterator].text.marks -= marks
-        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.filter((_,i)=> i !== id.subIterator)
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.filter((_, i) => i !== id.subIterator)
         break;
       case 3:
         tempQDetails[id.mainIterator].text.marks -= marks
         tempQDetails[id.mainIterator].subq[id.subIterator].text.marks -= marks
-        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.filter((_,i)=> i !== id.sub2xIterator)
+        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.filter((_, i) => i !== id.sub2xIterator)
         break;
       default: break;
     }
     calculateMarks(tempQDetails)
     setQDetails(tempQDetails)
+    let tempExamPaper = {...ExamPaper}
+    tempExamPaper.sections[CurrentSection] = tempQDetails
+    setExamPaper(tempExamPaper)
   }
 
-  const handleQuestionChange = (value,id)=>{
+  const handleQuestionChange = (value, id) => {
     let tempQDetails = [...QDetails]
-    console.log(value)
-    switch(Object.keys(id).length){
+    switch (Object.keys(id).length) {
       case 1:
-        tempQDetails = tempQDetails.map((main,i)=>{ 
-          if(i === id.mainIterator)
-          main = {...value,text:{ 
-            label :value.label,
-            value : value.value,
-            marks : value.marks
-          }}
-          
+        tempQDetails = tempQDetails.map((main, i) => {
+          if (i === id.mainIterator)
+            main = {
+              ...value, text: {
+                label: value.label,
+                value: value.value,
+                marks: value.marks
+              }
+            }
+
           return main
         })
         break;
       case 2:
-        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub,i) =>{
-          if(i === id.subIterator)
-          sub = {...value,text:{ 
-            label : value.label,
-            value : value.value,
-            marks : value.marks
-          }}
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub, i) => {
+          if (i === id.subIterator)
+            sub = {
+              ...value, text: {
+                label: value.label,
+                value: value.value,
+                marks: value.marks
+              }
+            }
 
           return sub
         })
-        tempQDetails[id.mainIterator].text.marks += value.marks
-
+        tempQDetails[id.mainIterator].text.marks = tempQDetails[id.mainIterator].subq.reduce((accumlator,question)=>accumlator+question.text.marks,0)
         break;
       case 3:
-        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.map((sub2x,i)=> {
+        tempQDetails[id.mainIterator].subq[id.subIterator].subq = tempQDetails[id.mainIterator].subq[id.subIterator].subq.map((sub2x, i) => {
           if (i === id.sub2xIterator)
-          sub2x = {...value,text:{ 
-            label :value.label,
-            value : value.value,
-            marks : value.marks
-          }}
+            sub2x = {
+              ...value, text: {
+                label: value.label,
+                value: value.value,
+                marks: value.marks
+              }
+            }
           return sub2x
         })
-        
-        tempQDetails[id.mainIterator].text.marks += value.marks
-        tempQDetails[id.mainIterator].subq[id.subIterator].text.marks += value.marks
+
+        tempQDetails[id.mainIterator].subq[id.subIterator].text.marks = tempQDetails[id.mainIterator].subq[id.subIterator].subq.reduce((accumlator,question)=>accumlator+question.text.marks,0)
+        tempQDetails[id.mainIterator].text.marks = tempQDetails[id.mainIterator].subq.reduce((accumlator,question)=>accumlator+question.text.marks,0)
         break;
       default: break;
     }
-    console.log(tempQDetails)
 
     calculateMarks(tempQDetails)
-    handleSelectedQuestions(tempQDetails)
     setQDetails(tempQDetails)
+    let tempExamPaper = {...ExamPaper}
+    tempExamPaper.sections[CurrentSection] = tempQDetails
+    setExamPaper(tempExamPaper)
   }
 
-  const handleQuestionTextChange = (value,id) =>{
+  const handleQuestionTextChange = (value, id) => {
     let tempQDetails = [...QDetails]
-    console.log(value)
-    switch(Object.keys(id).length){
+    switch (Object.keys(id).length) {
       case 1:
-        tempQDetails = tempQDetails.map((main,i)=>{ 
-          if(i === id.mainIterator)
-          main = {...main,text:{...main.text,label:value}} 
+        tempQDetails = tempQDetails.map((main, i) => {
+          if (i === id.mainIterator)
+            main = { ...main, text: { ...main.text, label: value } }
           return main
         })
         break
       case 2:
-        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub,i) =>{
-          if(i === id.subIterator)
-          sub = {...sub,text:{...sub.text,label:value}}
+        tempQDetails[id.mainIterator].subq = tempQDetails[id.mainIterator].subq.map((sub, i) => {
+          if (i === id.subIterator)
+            sub = { ...sub, text: { ...sub.text, label: value } }
           return sub
         })
         break
-      default:break
+      default: break
     }
     setQDetails(tempQDetails)
   }
@@ -347,7 +359,7 @@ export default function GeneratePaper() {
         onClick={() => {
           setShowFilter(false);
         }}
-        className="absolute mt-8 p-5 left-10 right-0 w-90 h-screen overflow-y-scroll bg-white flex flex-col items-start"
+        className="absolute mt-8 p-5 left-10 right-0 w-90 h-screen overflow-y-scroll  bg-white flex flex-col items-start"
       >
         {Page === "MetaData" && (
           <div className="w-full pb-10 h-full bg-white">
@@ -534,243 +546,286 @@ export default function GeneratePaper() {
         )}
 
         {Page === "Questions" && (
-          <div className="w-full h-screen  ">
-            <span className="absolute top-2 left-7 text-xl font-bold text-primary"> Questions </span>
-            <span
-              className={`absolute top-2 right-28 self-start text-base z-10 ${TotalMarks >= CurrentMarks
-                ? "text-primary "
-                : "text-red-500 animate-[pulse_1s_ease-in_infinite] "
-                } p-2 font-semibold rounded`}
+          <div className="w-full h-screen ">
+            <div className="flex flex-col pb-[45vh]">
+              <div className="w-full m-2 flex h-5 justify-between items-center text-xl font-bold text-primary">
+                <span className="flex-[2] text-start"> Questions </span>
 
-              onClick={_ => {
-                console.log(QDetails)
-              }}
-            >
-              Total Marks {CurrentMarks}
-            </span>
+                {ExamType.value === 2 &&
+                  <div className="flex-[1] flex text-primary items-center justify-center">
 
-            <div className="flex flex-col mt-5">
+                    <AiFillCaretLeft onClick={() => {
+                      if(CurrentSection !== 1)
+                        return
+                      
+                      const tempExamPaper = {...ExamPaper} 
+                      setCurrentSection(0)
+                      setQDetails(tempExamPaper.sections[0])
+                      calculateMarks(tempExamPaper.sections[0])
+                    }} />
+
+                    <AiFillCaretRight onClick={() => {
+                      if(CurrentSection !== 0)
+                        return
+                      
+                      const tempExamPaper = {...ExamPaper} 
+                      setCurrentSection(1)
+                      setQDetails(tempExamPaper.sections[1])
+                      calculateMarks(tempExamPaper.sections[1])
+
+                    }} />
+
+                    <p className="text-base font-semibold">Section {CurrentSection + 1}</p>
+                  </div>}
+
+                <div className="flex-[2] flex justify-end gap-3 items-center">
+
+                  <span
+                    className=  {`text-base ${TotalMarks/2 >= CurrentMarks
+                      ? "text-primary "
+                      : "text-red-500 animate-[pulse_1s_ease-in_infinite] "
+                      }  font-semibold `}
+
+                    onClick={_ => {
+                      console.log(ExamPaper)
+                    }}
+                  >
+                    Total Marks {CurrentMarks}
+                  </span>
+
+                  {<span
+                      className="flex items-center gap-2 justify-center rounded bg-primary text-white font-semibold p-2  hover:shadow-lg hover:shadow-primary/50 hover:transition-all ease-in-out duration-75 "
+                      onClick={() => {
+
+                        window.api.getCourseFromID(CourseID).then((value) => {
+                          let endTime = EndTime.split(":");
+                          let startTime = StartTime.split(":");
+
+                          if (parseInt(endTime[0]) > 12) {
+                            endTime =
+                              (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM";
+                          } else {
+                            endTime = endTime[0] + ":" + endTime[1] + " AM";
+                          }
+
+                          if (parseInt(startTime[0]) > 12) {
+                            startTime =
+                              (parseInt(startTime[0]) % 12) +
+                              ":" +
+                              startTime[1] +
+                              " PM";
+                          } else {
+                            startTime = startTime[0] + ":" + startTime[1] + " AM";
+                          }
+
+                          window.api.generatePaper({
+                            MetaData: {
+                              CourseCode: value.code,
+                              CourseName: value.name,
+                              TotalMarks: TotalMarks,
+                              Year: Year.label,
+                              Stream: Stream.label,
+                              AY: AY,
+                              ExamType: ExamType.label,
+                              Semester: Semester.label,
+                              Date: ExamDate.split("-").join("."),
+                              Time: startTime + " to " + endTime,
+                              Instructions: Instructions,
+                            },
+                            ExamPaper,
+                          })
+
+                          /*window.api
+                            .generateTex({
+                              MetaData: {
+                                CourseCode: value.code,
+                                CourseName: value.name,
+                                TotalMarks: TotalMarks,
+                                Year: Year.label,
+                                Stream: Stream.label,
+                                AY: AY,
+                                ExamType: ExamType.label,
+                                Semester: Semester.label,
+                                Date: ExamDate.split("-").join("."),
+                                Time: startTime + " to " + endTime,
+                                Instructions: Instructions,
+                              },
+                              ExamPaper,
+                            })
+                            .then(() => {
+                              window.api
+                                .getFile()
+                                .then((value) => {
+                                  setFile("data:application/pdf;base64," + value);
+                                })
+                                .then(() => {
+                                  setPage("PDF");
+                                });
+                            }); */
+                        });
+                      }}
+                    >
+                      Generate
+                    </span>}
+                </div>
+              </div>
+
               {/* MAIN QUESTION 🔴 */}
-                {QDetails.map((mainQuestion,mainIterator)=>{
-                  return <div key={"main"+mainIterator} className="flex flex-col w-full shadow-md m-2 "> 
+              {QDetails.map((mainQuestion, mainIterator) => {
+                return <div key={"main" + mainIterator} className="flex flex-col w-full shadow-md m-2 ">
                   <div className="text-[16px] h-full m-1 text-start flex gap-2 p-4 items-stretch justify-center ">
                     {/* That Delete Transition Here 🚇*/}
                     <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
                       <p className={`flex w-full h-full items-center justify-center 
                       text-primary  group-hover:hidden }`}>
-                      Q {mainIterator+1} </p>
+                        Q {mainIterator + 1} </p>
                       <p className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
                     text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
-                    group-hover:text-white group-hover:transition-all ease-linear `} 
-                      onClick={()=>handleRemove({mainIterator},mainQuestion.text.marks)}>Delete</p>
+                    group-hover:text-white group-hover:transition-all ease-linear `}
+                        onClick={() => handleRemove({ mainIterator }, mainQuestion.text.marks)}>Delete</p>
                     </div>
-                    {mainQuestion.subq.length > 0 && 
-                    <input
-                      id={"main"+mainIterator}
-                      type="text"
-                      className="TextBox w-full flex-[9]"
-                      value={mainQuestion.text.label}
-                      onChange={(event) => handleQuestionTextChange(event.currentTarget.value,{mainIterator})}
-                      placeholder="Enter Question"
-                    />}
+                    {mainQuestion.subq.length > 0 &&
+                      <input
+                        id={"main" + mainIterator}
+                        type="text"
+                        className="TextBox w-full flex-[9]"
+                        value={mainQuestion.text.label}
+                        onChange={(event) => handleQuestionTextChange(event.currentTarget.value, { mainIterator })}
+                        placeholder="Enter Question"
+                      />}
                     {mainQuestion.subq.length < 1 && <Select
-                      name={"main"+mainIterator}
+                      name={"main" + mainIterator}
                       className="flex-[9]"
                       placeholder={"Select Question"}
                       options={SelectedList}
                       hideSelectedOptions={true}
                       components={{
-                      Option: component,
-                      }} 
+                        Option: component,
+                      }}
                       value={mainQuestion.text}
-                      onChange={value=>handleQuestionChange(value,{mainIterator})}
-                      />
+                      onChange={value => handleQuestionChange(value, { mainIterator })}
+                    />
                     }
                     <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
-                    {mainQuestion.text.marks}</p>
+                      {mainQuestion.text.marks}</p>
                     {/* Generate New Sub Question ⚙ */}
                     <p id={mainIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
-                        onClick={_=>{
-                            let tempQDetails = [...QDetails]
-                            let id = parseInt(_.currentTarget.id)
-                            let subq = tempQDetails[parseInt(_.currentTarget.id)].subq 
-                            tempQDetails[id] = {text:tempQDetails[id].text,subq : [...subq,{ text:{label:"",value:undefined,marks:0},subq:[]}] }
-                            tempQDetails[id].text.marks = subq.reduce((accumlator,sub)=>sub.text.marks+accumlator,0)
-                            
-                            if(tempQDetails[id].subq.length === 1){
-                                tempQDetails[id].text.label = ""
-                                calculateMarks(tempQDetails)
-                            }
-                            handleSelectedQuestions(tempQDetails)
-                            setQDetails(tempQDetails)
-                        }}> 
-                    +</p>
-                  </div>
-                {/* SUB QUESTION 🔴 */}
-                {mainQuestion.subq.map((subQuestion,subIterator)=>{
-                    return <div key={"sub"+subIterator} className="flex flex-col w-full ">
-                    <div className="text-[16px] ml-6 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
-                      <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
-                        <p className={`flex w-full h-full items-center justify-center 
-                        text-primary  group-hover:hidden }`}>
-                        {String.fromCharCode(subIterator+65)} </p>
-                        <p className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
-                      text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
-                      group-hover:text-white group-hover:transition-all ease-linear `}
-                      onClick={()=> handleRemove({mainIterator,subIterator},subQuestion.text.marks)}>Delete</p>
-                      </div>
-                      {subQuestion.subq.length > 0 ? 
-                      <input
-                        id={subIterator}
-                        type="text"
-                        className="TextBox w-full flex-[9]"
-                        value={subQuestion.text.label}
-                        onChange={(event) => handleQuestionTextChange(event.currentTarget.value,{mainIterator,subIterator})}
-                        placeholder="Enter Question"
-                      />
-                      :
-                      <Select
-                        className="flex-[9]"
-                        placeholder={"Select Question"}
-                        options={SelectedList}
-                        hideSelectedOptions={true}
-                        components={{
-                        Option: component,
-                        }} 
-                        value={subQuestion.text}
-                        onChange={value=>handleQuestionChange(value,{mainIterator,subIterator})}
-                        />
-                      }
-                      <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary"> 
-                      {subQuestion.text.marks}</p>
-                      {/* Generate New Sub2X Question ⚙ */}
-                      <p id={mainIterator + " " +subIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
-                          onClick={_=>{
-                              let tempQDetails = [...QDetails]
-                              let ids = _.currentTarget.id.split(" ")
-                              let mainId = parseInt(ids[0])
-                              let subId = parseInt(ids[1])                              
-                              let subsub = tempQDetails[mainId].subq[subId].subq
-                              tempQDetails[mainId].subq[subId].subq = subsub = [...subsub,{text:{label:'',value:undefined,marks:0}}]
-                              tempQDetails[mainId].subq[subId] = {text:tempQDetails[mainId].subq[subId].text,subq:subsub}
-                              tempQDetails[mainId].subq[subId].text.marks = tempQDetails[mainId].subq[subId].subq.reduce(
-                                (accumlator,sub2x)=>sub2x.text.marks + accumlator,0)
-                              tempQDetails[mainId].text.marks = tempQDetails[mainId].subq.reduce(
-                                (accumlator,sub)=> sub.text.marks + accumlator,0)
+                      onClick={_ => {
+                        let tempQDetails = [...QDetails]
+                        let id = parseInt(_.currentTarget.id)
+                        let subq = tempQDetails[parseInt(_.currentTarget.id)].subq
+                        tempQDetails[id] = { text: tempQDetails[id].text, subq: [...subq, { text: { label: "", value: undefined, marks: 0 }, subq: [] }] }
+                        tempQDetails[id].text.marks = subq.reduce((accumlator, sub) => sub.text.marks + accumlator, 0)
 
-                              if(tempQDetails[mainId].subq[subId].subq.length === 1){
-                                tempQDetails[mainId].subq[subId].text.label = ""
-                                calculateMarks(tempQDetails)
-                              }
-                              handleSelectedQuestions(tempQDetails)
-                              setQDetails(tempQDetails)
-                          }}> 
+                        if (tempQDetails[id].subq.length === 1) {
+                          tempQDetails[id].text.label = ""
+                          calculateMarks(tempQDetails)
+                        }
+                        setQDetails(tempQDetails)
+                      }}>
                       +</p>
-                    </div>
-                    {/* SUB2X QUESTION 🔴 */}
-                    {subQuestion.subq.map((sub2xQuestion,sub2xIterator)=>{
-                      return <div key={"sub"+sub2xIterator} className="flex flex-col w-full ">
-                      
-                      <div className="text-[16px] ml-10 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                  </div>
+                  {/* SUB QUESTION 🔴 */}
+                  {mainQuestion.subq.map((subQuestion, subIterator) => {
+                    return <div key={"sub" + subIterator} className="flex flex-col w-full ">
+                      <div className="text-[16px] ml-6 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
                         <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
                           <p className={`flex w-full h-full items-center justify-center 
+                        text-primary  group-hover:hidden }`}>
+                            {String.fromCharCode(subIterator + 65)} </p>
+                          <p className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
+                      text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
+                      group-hover:text-white group-hover:transition-all ease-linear `}
+                            onClick={() => handleRemove({ mainIterator, subIterator }, subQuestion.text.marks)}>Delete</p>
+                        </div>
+                        {subQuestion.subq.length > 0 ?
+                          <input
+                            id={subIterator}
+                            type="text"
+                            className="TextBox w-full flex-[9]"
+                            value={subQuestion.text.label}
+                            onChange={(event) => handleQuestionTextChange(event.currentTarget.value, { mainIterator, subIterator })}
+                            placeholder="Enter Question"
+                          />
+                          :
+                          <Select
+                            className="flex-[9]"
+                            placeholder={"Select Question"}
+                            options={SelectedList}
+                            hideSelectedOptions={true}
+                            components={{
+                              Option: component,
+                            }}
+                            value={subQuestion.text}
+                            onChange={value => handleQuestionChange(value, { mainIterator, subIterator })}
+                          />
+                        }
+                        <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
+                          {subQuestion.text.marks}</p>
+                        {/* Generate New Sub2X Question ⚙ */}
+                        <p id={mainIterator + " " + subIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
+                          onClick={_ => {
+                            let tempQDetails = [...QDetails]
+                            let ids = _.currentTarget.id.split(" ")
+                            let mainId = parseInt(ids[0])
+                            let subId = parseInt(ids[1])
+                            let subsub = tempQDetails[mainId].subq[subId].subq
+                            tempQDetails[mainId].subq[subId].subq = subsub = [...subsub, { text: { label: '', value: undefined, marks: 0 } }]
+                            tempQDetails[mainId].subq[subId] = { text: tempQDetails[mainId].subq[subId].text, subq: subsub }
+                            tempQDetails[mainId].subq[subId].text.marks = tempQDetails[mainId].subq[subId].subq.reduce(
+                              (accumlator, sub2x) => sub2x.text.marks + accumlator, 0)
+                            tempQDetails[mainId].text.marks = tempQDetails[mainId].subq.reduce(
+                              (accumlator, sub) => sub.text.marks + accumlator, 0)
+
+                            if (tempQDetails[mainId].subq[subId].subq.length === 1) {
+                              tempQDetails[mainId].subq[subId].text.label = ""
+                              calculateMarks(tempQDetails)
+                            }
+                            setQDetails(tempQDetails)
+                          }}>
+                          +</p>
+                      </div>
+                      {/* SUB2X QUESTION 🔴 */}
+                      {subQuestion.subq.map((sub2xQuestion, sub2xIterator) => {
+                        return <div key={"sub" + sub2xIterator} className="flex flex-col w-full ">
+
+                          <div className="text-[16px] ml-10 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                            <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
+                              <p className={`flex w-full h-full items-center justify-center 
                           text-primary  group-hover:hidden }`}>
-                          {sub2xIterator+1} </p>
-                          <p id={mainIterator + " " + subIterator + " " + sub2xIterator} className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
+                                {sub2xIterator + 1} </p>
+                              <p id={mainIterator + " " + subIterator + " " + sub2xIterator} className={`overflow-hidden flex-[1] flex w-0 h-0 rounded items-center justify-center  
                         text-primary  group-hover:h-full group-hover:w-full group-hover:bg-red-500 
                         group-hover:text-white group-hover:transition-all ease-linear `}
-                        onClick={ ()=> handleRemove({mainIterator,subIterator,sub2xIterator},sub2xQuestion.text.marks) }>Delete</p>
+                                onClick={() => handleRemove({ mainIterator, subIterator, sub2xIterator }, sub2xQuestion.text.marks)}>Delete</p>
+                            </div>
+                            <Select
+                              className="flex-[9]"
+                              placeholder={"Select Question"}
+                              options={SelectedList}
+                              hideSelectedOptions={true}
+                              components={{
+                                Option: component,
+                              }}
+                              value={sub2xQuestion.text}
+                              onChange={value => handleQuestionChange(value, { mainIterator, subIterator, sub2xIterator })}
+                            />
+                            <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
+                              {sub2xQuestion.text.marks}</p>
+                          </div>
                         </div>
-                        <Select
-                          className="flex-[9]"
-                          placeholder={"Select Question"}
-                          options={SelectedList}
-                          hideSelectedOptions={true}
-                          components={{
-                          Option: component,
-                          }}
-                          value={sub2xQuestion.text}
-                          onChange={value=>handleQuestionChange(value,{mainIterator,subIterator,sub2xIterator})}
-                          />
-                          <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary"> 
-                          {sub2xQuestion.text.marks}</p>
-                      </div>
-                      </div>
-                    })}
-                    
-                  </div>
+                      })}
+
+                    </div>
                   })}
-                  </div>
-                })}
-                
-                
-                  
-                {/*QDetails.map( (value,i) =>{
-                  return 
-                })*/}
-              <AiFillPlusCircle className="text-primary self-center m-2 mb-10" onClick={_=>{
-                  setQDetails([...QDetails,{text:{label:"",marks:0 , value: 0},subq:[]}])
-                }}/>
+                </div>
+              })}
+
+              <AiFillPlusCircle className="text-primary self-center m-2" onClick={_ => {
+                setQDetails([...QDetails, { text: { label: "", marks: 0, value: 0 }, subq: [] }])
+              }} />
             </div>
 
-            <span
-              className="flex items-center gap-2 justify-center rounded bg-primary text-white absolute text-base font-semibold p-2 self-start top-2 right-5 hover:shadow-lg hover:shadow-primary/50 hover:transition-all ease-in-out duration-75 "
-              onClick={() => {
-                window.api.getCourseFromID(CourseID).then((value) => {
-                  let endTime = EndTime.split(":");
-                  let startTime = StartTime.split(":");
-
-                  if (parseInt(endTime[0]) > 12) {
-                    endTime =
-                      (parseInt(endTime[0]) % 13) + ":" + endTime[1] + " PM";
-                  } else {
-                    endTime = endTime[0] + ":" + endTime[1] + " AM";
-                  }
-
-                  if (parseInt(startTime[0]) > 12) {
-                    startTime =
-                      (parseInt(startTime[0]) % 12) +
-                      ":" +
-                      startTime[1] +
-                      " PM";
-                  } else {
-                    startTime = startTime[0] + ":" + startTime[1] + " AM";
-                  }
-
-                  console.log(QDetails);
-
-                  window.api
-                    .generateTex({
-                      MetaData: {
-                        CourseCode: value.code,
-                        CourseName: value.name,
-                        TotalMarks: TotalMarks,
-                        Year: Year.label,
-                        Stream: Stream.label,
-                        AY: AY,
-                        ExamType: ExamType.label,
-                        Semester: Semester.label,
-                        Date: ExamDate.split("-").join("."),
-                        Time: startTime + " to " + endTime,
-                        Instructions: Instructions,
-                      },
-                      QuestionDetails: QDetails,
-                    })
-                    .then(() => {
-                      window.api
-                        .getFile()
-                        .then((value) => {
-                          setFile("data:application/pdf;base64," + value);
-                        })
-                        .then(() => {
-                          setPage("PDF");
-                        });
-                    });
-                });
-              }}
-            >
-              Generate
-            </span>
           </div>
 
         )}
