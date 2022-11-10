@@ -54,7 +54,7 @@ contextBridge.exposeInMainWorld('api', {
 
   showDialog: args => ipcRenderer.invoke('showDialog', args),
 
-  generateTex: args => ipcRenderer.invoke('generateTex', args),
+  generatePaper: args => ipcRenderer.invoke('generatePaper', args),
 
   deleteQuestion: args => ipcRenderer.invoke('deleteQuestion', args),
 

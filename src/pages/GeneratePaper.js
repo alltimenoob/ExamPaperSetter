@@ -618,6 +618,23 @@ export default function GeneratePaper() {
                             startTime = startTime[0] + ":" + startTime[1] + " AM";
                           }
 
+                          console.log({
+                            MetaData: {
+                              CourseCode: value.code,
+                              CourseName: value.name,
+                              TotalMarks: TotalMarks,
+                              Year: Year.label,
+                              Stream: Stream.label,
+                              AY: AY,
+                              ExamType: ExamType.label,
+                              Semester: Semester.label,
+                              Date: ExamDate.split("-").join("."),
+                              Time: startTime + " to " + endTime,
+                              Instructions: Instructions,
+                            },
+                            ExamPaper,
+                          });
+
                           window.api.generatePaper({
                             MetaData: {
                               CourseCode: value.code,
