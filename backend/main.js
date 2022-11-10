@@ -11,6 +11,7 @@ const insertQuestion = require("./api/insertQuestion");
 const getUnits = require("./api/getUnits");
 const getCourseOutcomes = require("./api/getCourseOutcomes");
 const updateCourseOutcomes = require("./api/updateCourseOutcomes");
+const generatePaper = require("./api/generatePaper");
 
 const updateUnits = require("./api/updateUnits");
 
@@ -162,7 +163,7 @@ ipcMain.handle("saveFile", async (event, args) => {
     );
 
     fs.copyFile(
-      "exam_paper__.tex",
+      "exam_paper.tex",
       path.join(filename.filePaths[0], "/output.tex"),
       (err) => {
         if (err) {
@@ -534,7 +535,7 @@ ipcMain.handle("openAddQuestions", (event, args) => {
 ipcMain.handle("getFile", async (event, args) => {
   try {
     const data = await fsa.readFile(
-      path.join(app.getAppPath(), "/output/exam_paper__.pdf"),
+      path.join(app.getAppPath(), "/output/exam_paper.pdf"),
       { encoding: "base64" }
     );
     return data;
@@ -562,183 +563,6 @@ ipcMain.handle("openUpdateQuestion", (event, args) => {
 ipcMain.handle("goBack", () => {
   mainWindow.webContents.goBack();
 });
-
-ipcMain.handle("generateTex", (event, args) => {
-  const MetaData = args.MetaData;
-
-  args = args.QuestionDetails;
-
-  let questionsCode = "";
-
-  const headerCode = `
-    \\hspace{-7mm}ID No.\\rule{20mm}{0.3mm}
-    \\begin{center}
- \\textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)} \\\\
-  \\textbf{\\textit{(An Autonomous Institute)}} \\\\
-  \\textbf{${MetaData.Year} Year, ${MetaData.Stream}} \\\\
-  \\textbf{${MetaData.ExamType} ,${MetaData.Semester},AY ${MetaData.AY}} \\\\
-  \\vspace{4mm}
- 
- 
-  \\end{center}
- 
-%Course code, title, maximum marks, date, time
-  \\hspace{-7mm}
-  \\parbox[t]{50mm}{\\textbf{Course Code: ${MetaData.CourseCode}}}
-  \\parbox[t]{100mm}{\\textbf{Course Title: ${MetaData.CourseName
-    }}}\\vspace{2mm}\\\\
-  \\parbox[t]{50mm}{\\textbf{Date: ${MetaData.Date}}}
-  \\parbox[t]{75mm}{\\textbf{Time : ${MetaData.Time}}}
-  \\parbox[t]{50mm}{\\textbf{Maximum Marks: ${MetaData.TotalMarks}}}\\\\
-  \\line(1,0){170mm} \\vspace{2mm}
-  \\hspace{-6mm}\\textbf{Instruction}
-
- 
-%instruction section
-
-  \\begin{itemize}[leftmargin=4mm,rightmargin=-2cm]
-      \\item Numbers in the square brackets to the right indicate maximum marks.
-     ${MetaData.Instructions.map((value) => {
-      return "\\item " + value.value;
-    })}
-      \\item The text just below marks indicates the Course Outcome Nos. (CO) followed by the Bloom’s taxonomy level of the question, i.e., R: Remember, U: Understand, A: Apply, N: Analyze, E: Evaluate, C: Create
-  \\end{itemize}
-  \\line(1,0){170mm}
- \\vspace{5mm}\n`;
-
-  questionsCode += "\\begin{questions}\n";
-  questionsCode += "\\pointname{}\n";
-  questionsCode += "\\pointsinrightmargin\n";
-
-  args.forEach((question) => {
-    var co = "";
-
-    var taxonomy = question.text.taxonomy_letter;
-
-    if (!question.showText) {
-      question.text.cource_outcomes.forEach((value, i) => {
-        if (i === 0) co += value.course_outcomes_number;
-        else co += "," + value.course_outcomes_number;
-      });
-      questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\\\ ${co + taxonomy
-        }}}`;
-    } else {
-      questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`;
-    }
-
-    if (question.showText) {
-      //It has sub questions
-      console.log(question);
-      questionsCode += `\\question[${question.marks}]\n`;
-
-      question.text.label = question.text.label.split("\n");
-
-      question.text.label.forEach((value, i) => {
-        if (i !== 0) questionsCode += `\\rule{0.5cm}{0pt}`;
-        if (i === question.text.label.length - 1) questionsCode += `${value}\n`;
-        else questionsCode += `${value}\\\\\n`;
-      });
-
-      questionsCode += `\n`;
-
-      questionsCode += `\\vspace{1.5mm}\n\\begin{parts}\n`;
-
-      question.subq.forEach((sub_q) => {
-        var co = "";
-
-        var taxonomy = sub_q.taxonomy_letter;
-
-        sub_q.cource_outcomes.forEach((value, i) => {
-          if (i === 0) co += value.course_outcomes_number;
-          else co += "," + value.course_outcomes_number;
-        });
-
-        questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\\\ ${co + taxonomy
-          }}}`;
-        questionsCode += `\\part[${sub_q.marks}] ${sub_q.label[0]
-          }\\vspace{-\\baselineskip}\\vspace{1.5mm}${sub_q.label.substring(
-            1,
-            sub_q.label.length
-          )} \n\n`;
-
-        if (sub_q.question_type_name === "MCQ") {
-          questionsCode += `\\vspace{1.5mm}\n\\begin{oneparchoices}\n`;
-
-          sub_q.mcqs.forEach((option) => {
-            questionsCode += `\\choice ${option.option_text}\n`;
-          });
-
-          questionsCode += `\\end{oneparchoices}\n\\vspace{1.5mm}\n`;
-        }
-        questionsCode += `\\vspace{5mm}`;
-      });
-      questionsCode += "\\end{parts}\n";
-    } else {
-      //It has no sub questions
-      questionsCode += `\\question[${question.text.marks}]\n`;
-
-      const mltQuestion = question.text.label.split("\n");
-
-      if (mltQuestion.length > 1) {
-        mltQuestion.forEach((value, i) => {
-          if (i !== 0) questionsCode += `\\rule{0.5cm}{0pt}`;
-          if (i === mltQuestion.length - 1) questionsCode += `${value}\n`;
-          else questionsCode += `${value}\\\\\n`;
-        });
-      } else {
-        questionsCode += `${mltQuestion[0]}\n`;
-      }
-
-      if (question.text.question_type_name === "MCQ") {
-        questionsCode += `\\vspace{1.5mm}\n\\begin{oneparchoices}\n`;
-
-        question.text.mcqs.forEach((option) => {
-          questionsCode += `\\choice ${option.option_text}\n`;
-        });
-
-        questionsCode += `\\end{oneparchoices}\n\\vspace{1.5mm}\n`;
-      }
-    }
-  });
-
-  questionsCode += "\\end{questions}\n";
-
-  const examPaperCode =
-    `\\documentclass[addpoints,12pt]{exam}
-  \\usepackage[a4paper]{geometry}
-  \\usepackage{enumitem}
-  \\usepackage{amsmath,stackengine}
-  \\geometry{
-  a4paper,
-  total={150mm,257mm},
-  left=25mm,
-  top=20mm,
-  } 
-    
-
- 
-  \\begin{document}` +
-    headerCode +
-    questionsCode +
-    `\\end{document}`;
-
-  fs.writeFileSync("./exam_paper__.tex", examPaperCode);
-
-  const { exec } = require("child_process");
-
-  return new Promise((resolve, reject) => {
-    exec(
-      "pdflatex --output-directory=" +
-      path.join(app.getAppPath(), "/output/") +
-      " exam_paper__.tex",
-      (error, stdout, stderr) => {
-        resolve(stdout.trim());
-      }
-    );
-  });
-});
-
-
 
 ipcMain.handle("getQuestions", async (_, args) => {
   const CourseID = args.course_id;
@@ -823,5 +647,10 @@ ipcMain.handle("getCourseOutcomes", async (_, args) => {
 
 ipcMain.handle("updateCourseOutcomes", async (_, args) => {
   const result = await updateCourseOutcomes(args, database);
+  return result;
+});
+
+ipcMain.handle("generatePaper", async (_,args) => {
+  const result = await generatePaper(args,fs,path.join(app.getAppPath(), "/output/"));
   return result;
 });
