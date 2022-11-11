@@ -47,26 +47,56 @@ const generatePaper = (args,fs,outputPath) => {
 
   //Questions section begin here
 
-  questionsCode+=`\\begin{questions}\n`
-  questionsCode+=`\\pointname{}`
-  questionsCode+=`\\pointsinrightmargin`
+  const section1=ExamPaper.sections[0]
+  const section2=ExamPaper.sections[1]
+  
+  //For SECTION 1
 
-  ExamPaper.sections.forEach(section => {
-      if(section.length>0) {
-          //For questions inside sections
-          section.forEach( question => {
-              // For MCQ type Questions
-              if( question.question_type_name === 'MCQ') {
-                  questionsCode += addMcqQuesion(question);
-              } else {
-                  questionsCode += addQuestion(question);
-              }
-          });
+  if(section2.length!==0) { //If section 2 exists
+      questionsCode+=`\\begin{center}\n`
+      questionsCode+=`\\underline{\\textbf{SECTION-1}}\\\\\n`
+      questionsCode+=`\\end{center}\n`
+  }
+
+  questionsCode+=`\\begin{questions}\n`
+  questionsCode+=`\\pointname{}\n`
+  questionsCode+=`\\pointsinrightmargin\n`
+
+  section1.forEach( question => {
+      // For MCQ type Questions
+      if( question.question_type_name === 'MCQ') {
+          questionsCode += `\\question[${question.marks}] ${question.text.label}\n`+addMcqOptions(question);
+      } else {
+          questionsCode += addQuestion(question);
       }
   });
 
   questionsCode+=`\\end{questions}`
-    
+
+  if(section2.length!==0) {
+
+      questionsCode+=`\\pagebreak\n`
+      questionsCode+=`\\begin{center}\n`
+      questionsCode+=`\\underline{\\textbf{SECTION-2}}\\\\\n`
+      questionsCode+=`\\end{center}\n`
+
+      //For SECTION 2
+      questionsCode+=`\\begin{questions}\n`
+      questionsCode+=`\\pointname{}\n`
+      questionsCode+=`\\pointsinrightmargin\n`
+
+      section2.forEach( question => {
+          // For MCQ type Questions
+          if( question.question_type_name === 'MCQ') {
+              questionsCode += `\\question[${question.marks}] ${question.text.label}\n`+addMcqOptions(question);
+          } else {
+              questionsCode += addQuestion(question);
+          }
+      });
+
+      questionsCode+=`\\end{questions}\n`
+  }
+  
     const examPaperCode =
       `\\documentclass[addpoints,12pt]{exam}
     \\usepackage[a4paper]{geometry}
@@ -100,7 +130,8 @@ const generatePaper = (args,fs,outputPath) => {
     });
   };
 
-  function addMcqQuesion(question) {
+
+  function addMcqOptions(question) {
     let mcqCode=""
     mcqCode += `\\vspace{1.5mm}\n\\begin{oneparchoices}\\\\\n`;
     
@@ -117,24 +148,28 @@ function addQuestion(question) {
     if(question.subq.length===0) {
         questionsCode += `\\question[${question.text.marks}]\n`
         questionsCode += `\\vspace{-\\baselineskip}\\vspace{3.5mm}${question.text.label}\n`;
-
-        
     } else {
+
         let label=question.text.label
         label=label===""?"Answere following":label
         questionsCode+=`\\question[${question.text.marks}]\n`
         questionsCode+=`\\vspace{-\\baselineskip}\\vspace{3.5mm}${label}\n`
         questionsCode+=`\\begin{parts}\n`
         question.subq.forEach(subQuestion => {
-            if(subQuestion.subq.length===0) {
+            if( subQuestion.question_type_name === 'MCQ') {
+                questionsCode += `\\part[${subQuestion.marks}] ${subQuestion.text.label}\n`+addMcqOptions(subQuestion);
+            } else if(subQuestion.subq.length===0) {
                 questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{${subQuestion.taxonomy_letter}}}}\n`
                 questionsCode+=`\t\\part[${subQuestion.marks}] ${subQuestion.label}\n`
-                
             } else {
                 questionsCode+=`\t\\part[${subQuestion.text.marks}] ${subQuestion.text.label}\n`
                 questionsCode+=`\\begin{subparts}\n`
                 subQuestion.subq.forEach(subSubQuestion => {
-                    questionsCode+=`\t\t\\subpart ${subSubQuestion.label}\n`
+                    if( subSubQuestion.question_type_name === 'MCQ') {
+                        questionsCode += `\\subpart[${subSubQuestion.marks}] ${subSubQuestion.text.label}\n`+addMcqOptions(subSubQuestion)
+                    } else {
+                        questionsCode+=`\t\t\\subpart ${subSubQuestion.label}\n`
+                    }
                 })
                 questionsCode+=`\\end{subparts}\n`
             }
@@ -144,5 +179,4 @@ function addQuestion(question) {
     }
     return questionsCode;
 }
-
 module.exports = generatePaper
