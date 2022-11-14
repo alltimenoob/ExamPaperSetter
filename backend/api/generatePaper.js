@@ -1,6 +1,68 @@
-const { isLabelWithInternallyDisabledControl } = require("@testing-library/user-event/dist/utils");
 
-const generatePaper = (args,fs,outputPath) => {
+const fs = require("fs")
+const fse = require("fs-extra")
+
+const addQuestion = (question,type) => {
+
+  let questionsCode=""
+
+  questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline`
+  question.cource_outcomes.forEach((co)=>{
+    questionsCode += co.course_outcomes_number + ","
+  })
+  questionsCode += question.taxonomy_letter + "}}"
+  
+  if(question.subq.length === 0){
+    
+    if(question.question_type_name === "MCQ"){
+        
+      questionsCode += `${type}[5] ` +
+      question.text.label[0] + `\\vspace{-\\baselineskip}\\vspace{2mm}` + 
+      question.text.label.slice(1,question.text.label.length) + 
+      `\n\\begin{oneparchoices}\\\\\n`
+  
+      question.mcqs.forEach((option) => {
+        questionsCode += `\t\\choice ${option.option_text}\n`
+      });
+    
+      questionsCode += `\\end{oneparchoices}\n` 
+
+    }
+    else{
+      questionsCode += `${type}[${question.text.marks}] ` +
+      question.text.label[0] + `\\vspace{-\\baselineskip}\\vspace{1mm}` + 
+      question.text.label.slice(1,question.text.label.length) 
+    }
+
+    if(question.question_image !== null ){
+      var byteString;
+      if (question.question_image.split(',')[0].indexOf('base64') >= 0)
+          byteString = atob(question.question_image.split(',')[1]);
+      else
+          byteString = unescape(question.question_image.split(',')[1]);
+
+      var ia = new Uint8Array(byteString.length);
+      
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      const type = question.question_image.match(/[^:/]\w+(?=;|,)/)[0];
+      
+      fs.writeFileSync(`./input/${question.text.value}.${type}`,ia)
+      questionsCode += "\\\\\n"
+      questionsCode += `\\includegraphics[width=10cm,height=4cm]{${question.text.value}.${type}}`
+      //🙍‍♂️
+
+    }
+  }
+
+  questionsCode += "\n \\vspace{2mm} \n\n "
+  return questionsCode;
+}
+
+const generatePaper = (args,outputPath) => {
+    fse.emptyDirSync("./input/");
     const MetaData = args.MetaData;
     const ExamPaper = args.ExamPaper;
     
@@ -63,15 +125,32 @@ const generatePaper = (args,fs,outputPath) => {
   questionsCode+=`\\pointsinrightmargin\n`
 
   section1.forEach( question => {
-      // For MCQ type Questions
-      if( question.question_type_name === 'MCQ') {
-          questionsCode += `\\question[${question.marks}] ${question.text.label}\n`+addMcqOptions(question);
-      } else {
-          questionsCode += addQuestion(question);
+      if(question.subq.length === 0)
+        questionsCode += addQuestion(question,  /* type main */ "\\question") 
+      else{
+        questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`
+        questionsCode += `\\question[${question.text.marks}] ${question.text.label}`
+        questionsCode += `\\vspace{1mm}`
+        questionsCode += "\\begin{parts}"
+        question.subq.forEach((question)=>{
+          if(question.subq.length === 0)
+            questionsCode += addQuestion(question,  /* type sub */ "\\part") 
+          else{
+            questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`
+            questionsCode += `\\part[${question.text.marks}] ${question.text.label}`
+            questionsCode += `\\vspace{1mm}`
+            questionsCode += "\\begin{subparts}"
+            question.subq.forEach((question)=>{
+              questionsCode += addQuestion(question,  /* type sub2x */ "\\subpart") 
+            })
+            questionsCode += "\\end{subparts}"
+          }
+        })
+        questionsCode += "\\end{parts}\n"
       }
   });
 
-  questionsCode+=`\\end{questions}`
+  questionsCode+=`\\end{questions}\n`
 
   if(section2.length!==0) {
 
@@ -80,19 +159,35 @@ const generatePaper = (args,fs,outputPath) => {
       questionsCode+=`\\underline{\\textbf{SECTION-2}}\\\\\n`
       questionsCode+=`\\end{center}\n`
 
-      //For SECTION 2
       questionsCode+=`\\begin{questions}\n`
       questionsCode+=`\\pointname{}\n`
       questionsCode+=`\\pointsinrightmargin\n`
 
       section2.forEach( question => {
-          // For MCQ type Questions
-          if( question.question_type_name === 'MCQ') {
-              questionsCode += `\\question[${question.marks}] ${question.text.label}\n`+addMcqOptions(question);
-          } else {
-              questionsCode += addQuestion(question);
-          }
-      });
+        if(question.subq.length === 0)
+          questionsCode += addQuestion(question,  /* type main */ "\\question") 
+        else{
+          questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`
+          questionsCode += `\\question[${question.text.marks}] ${question.text.label}`
+          questionsCode += `\\vspace{1mm}`
+          questionsCode += "\\begin{parts}"
+          question.subq.forEach((question)=>{
+            if(question.subq.length === 0)
+              questionsCode += addQuestion(question,  /* type sub */ "\\part") 
+            else{
+              questionsCode += `\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}}}`
+              questionsCode += `\\part[${question.text.marks}] ${question.text.label}`
+              questionsCode += `\\vspace{1mm}`
+              questionsCode += "\\begin{subparts}"
+              question.subq.forEach((question)=>{
+                questionsCode += addQuestion(question,  /* type sub2x */ "\\subpart") 
+              })
+              questionsCode += "\\end{subparts}"
+            }
+          })
+          questionsCode += "\\end{parts}\n"
+        }
+    });
 
       questionsCode+=`\\end{questions}\n`
   }
@@ -102,27 +197,30 @@ const generatePaper = (args,fs,outputPath) => {
     \\usepackage[a4paper]{geometry}
     \\usepackage{enumitem}
     \\usepackage{amsmath,stackengine}
+    \\usepackage{graphicx}
+    \\usepackage{lastpage}
+    
     \\geometry{
     a4paper,
     total={150mm,257mm},
     left=25mm,
     top=20mm,
     } 
-   
+    \\graphicspath{ {./input/}}
+    \\cfoot{Page \\thepage\\ of \\pageref{LastPage}}
+
     \\begin{document}` +
       headerCode +
       questionsCode +
       `\\end{document}`;
   
-    fs.writeFileSync("./exam_paper.tex", examPaperCode);
+    fs.writeFileSync("./input/exam_paper.tex", examPaperCode);
   
     const { exec } = require("child_process");
   
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       exec(
-        "pdflatex --output-directory=" +
-        outputPath +
-        " exam_paper.tex",
+        "pdflatex --output-directory=" + outputPath + " ./input/exam_paper.tex",
         (error, stdout, stderr) => {
           resolve(stdout.trim());
         }
@@ -131,52 +229,5 @@ const generatePaper = (args,fs,outputPath) => {
   };
 
 
-  function addMcqOptions(question) {
-    let mcqCode=""
-    mcqCode += `\\vspace{1.5mm}\n\\begin{oneparchoices}\\\\\n`;
-    
-    question.mcqs.forEach((option) => {
-        mcqCode += `\t\\choice ${option.option_text}\n`;
-    });
 
-    mcqCode += `\\end{oneparchoices}\n\\vspace{1.5mm}\n`;
-    return mcqCode;
-}
-
-function addQuestion(question) {
-    let questionsCode=""
-    if(question.subq.length===0) {
-        questionsCode += `\\question[${question.text.marks}]\n`
-        questionsCode += `\\vspace{-\\baselineskip}\\vspace{3.5mm}${question.text.label}\n`;
-    } else {
-
-        let label=question.text.label
-        label=label===""?"Answere following":label
-        questionsCode+=`\\question[${question.text.marks}]\n`
-        questionsCode+=`\\vspace{-\\baselineskip}\\vspace{3.5mm}${label}\n`
-        questionsCode+=`\\begin{parts}\n`
-        question.subq.forEach(subQuestion => {
-            if( subQuestion.question_type_name === 'MCQ') {
-                questionsCode += `\\part[${subQuestion.marks}] ${subQuestion.text.label}\n`+addMcqOptions(subQuestion);
-            } else if(subQuestion.subq.length===0) {
-                questionsCode+=`\\pointformat{\\parbox[t]{16pt}{\\text{[\\thepoints]}\\newline{${subQuestion.taxonomy_letter}}}}\n`
-                questionsCode+=`\t\\part[${subQuestion.marks}] ${subQuestion.label}\n`
-            } else {
-                questionsCode+=`\t\\part[${subQuestion.text.marks}] ${subQuestion.text.label}\n`
-                questionsCode+=`\\begin{subparts}\n`
-                subQuestion.subq.forEach(subSubQuestion => {
-                    if( subSubQuestion.question_type_name === 'MCQ') {
-                        questionsCode += `\\subpart[${subSubQuestion.marks}] ${subSubQuestion.text.label}\n`+addMcqOptions(subSubQuestion)
-                    } else {
-                        questionsCode+=`\t\t\\subpart ${subSubQuestion.label}\n`
-                    }
-                })
-                questionsCode+=`\\end{subparts}\n`
-            }
-            
-        })
-        questionsCode+=`\\end{parts}\n`
-    }
-    return questionsCode;
-}
 module.exports = generatePaper

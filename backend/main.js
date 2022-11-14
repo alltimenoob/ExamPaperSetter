@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const fsa = require("fs/promises");
 const sqlite = require("sqlite3");
-
+const fse = require("fs-extra");
 const updateQuestion = require("./api/updateQuestion");
 const deleteQuestion = require("./api/deleteQuestion");
 const insertQuestion = require("./api/insertQuestion");
@@ -155,24 +155,20 @@ ipcMain.handle("saveFile", async (event, args) => {
   let filename = await dialog.showOpenDialog(mainWindow, options);
   if (!filename.canceled) {
     var base64Data = args.replace(/^data:application\/pdf;base64,/, "");
-
+    
+    const p = path.join(filename.filePaths[0], "/exampaper")
+    if (!fs.existsSync(p)){
+      fs.mkdirSync(p);
+    }
     fs.writeFileSync(
-      path.join(filename.filePaths[0], "/output.pdf"),
+      path.join(p, "output.pdf"),
       base64Data,
       "base64"
     );
 
-    fs.copyFile(
-      "exam_paper.tex",
-      path.join(filename.filePaths[0], "/output.tex"),
-      (err) => {
-        if (err) {
-          console.log("Error Found:", err);
-        } else {
-          console.log("\nFile Contents of copied_file::");
-        }
-      }
-    );
+
+    fse.copySync("input", path.join(p,"input"))
+      
   }
 });
 
@@ -651,6 +647,7 @@ ipcMain.handle("updateCourseOutcomes", async (_, args) => {
 });
 
 ipcMain.handle("generatePaper", async (_,args) => {
-  const result = await generatePaper(args,fs,path.join(app.getAppPath(), "/output/"));
+  const result = await generatePaper(args,path.join(app.getAppPath(), "/output/"));
+  
   return result;
 });

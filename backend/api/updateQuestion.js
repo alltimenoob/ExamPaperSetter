@@ -1,67 +1,47 @@
-function updateQuestion(args, db) {
+function insertQuestion(args, db) {
 
   return new Promise((resolve) => {
-    db.serialize(function () {
-      var stmt = db.prepare(
-        "REPLACE INTO question (question_id,question_text,question_type_id,marks,course_id,taxonomy_id,unit_id) VALUES (?,?,?,?,?,?,?)"
-      );
+      db.serialize(function () {
 
-      stmt.run(
-        args.question_id,
-        args.question_text,
-        args.question_type_id,
-        args.marks,
-        args.course_id,
-        args.taxonomy_id,
-        args.unit_id, (_) => { if (_) resolve({ error: "❌ Question Could Not Be Replaced", status: -1 }) });
-
-      stmt.finalize();
-
-      stmt = db.prepare(
-        "DELETE FROM course_outcomes_question WHERE question_id = ? "
-      );
-
-      stmt.run(args.question_id, (_) => { if (_) resolve({ error: "❌ Course Outcomes Could Not Be Deleted ", status: -1 }) });
-
-      stmt.finalize();
-
-      args.cource_outcome_ids.forEach((value) => {
-        stmt = db.prepare(
-          "INSERT INTO course_outcomes_question(question_id,course_outcomes_id) VALUES(?,?)"
-        );
-
-        stmt.run(args.question_id, value, (_) => { if (_) resolve({ error: "❌ Course Outcomes Could Not Be Insert ", status: -1 }) });
-      });
-
-      stmt.finalize();
-
-      stmt = db.prepare(
-        "DELETE FROM mcq_option WHERE question_id = ? "
-      );
-
-      stmt.run(args.question_id, (_) => {
-        if (_) resolve({ error: "❌ MCQ Options Could Not Be Deleted ", status: -1 });
-        if (!args.isMCQ) resolve({ error: "✅ Question Updated Successfully", status: 1 })
-      });
-
-      if (args.isMCQ) {
-        args.options.forEach((value) => {
-          stmt = db.prepare(
-            "INSERT INTO mcq_option(question_id,option_text) VALUES(?,?)"
+          var stmt = db.prepare(
+              "INSERT INTO question (question_text,question_type_id,marks,course_id,taxonomy_id,unit_id,question_image) VALUES (?,?,?,?,?,?,?)"
           );
 
-          stmt.run(args.question_id, value, (_) => {
-            if (_) resolve({ error: "❌ MCQ Options Could Not Be Inserted ", status: -1 }); else
-              resolve({ error: "✅ Question Updated Successfully", status: 1 })
+          stmt.run(
+              args.question_text,
+              args.question_type_id,
+              args.marks,
+              args.course_id,
+              args.taxonomy_id,
+              args.unit_id,
+              args.question_image, (_) => { if (_) resolve({ error: "❌ Question Already Exists ", status: -1 }) });
+
+          stmt.finalize();
+
+          const insertCourseOutcomes = (id) => {
+              var stmt = db.prepare("INSERT INTO course_outcomes_question(question_id,course_outcomes_id) VALUES(?,?)");
+
+              args.cource_outcome_ids.forEach(element => {
+                  stmt.run(id, element)
+              });
+
+              stmt.finalize();
+
+              resolve({ error: "✅ Question Added Successfully", status: 1 })
+          }
+
+          db.get("SELECT last_insert_rowid()", (_, row) => {
+              if (_) resolve({ error: "❌ Could Not Find The ID For Question", status: -1 })
+              insertCourseOutcomes(row["last_insert_rowid()"])
           });
-        })
-      }
 
-
-      stmt.finalize();
-    });
+      });
   })
+
+
+
 
 }
 
-module.exports = updateQuestion;
+
+module.exports = insertQuestion;

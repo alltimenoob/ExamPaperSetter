@@ -4,7 +4,7 @@ function insertQuestion(args, db) {
         db.serialize(function () {
 
             var stmt = db.prepare(
-                "INSERT INTO question (question_text,question_type_id,marks,course_id,taxonomy_id,unit_id) VALUES (?,?,?,?,?,?)"
+                "INSERT INTO question (question_text,question_type_id,marks,course_id,taxonomy_id,unit_id,question_image) VALUES (?,?,?,?,?,?,?)"
             );
 
             stmt.run(
@@ -13,7 +13,8 @@ function insertQuestion(args, db) {
                 args.marks,
                 args.course_id,
                 args.taxonomy_id,
-                args.unit_id, (_) => { if (_) resolve({ error: "❌ Question Already Exists ", status: -1 }) });
+                args.unit_id,
+                args.question_image, (_) => { if (_) resolve({ error: "❌ Question Already Exists ", status: -1 }) });
 
             stmt.finalize();
 
