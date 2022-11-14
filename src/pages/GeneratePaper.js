@@ -5,6 +5,7 @@ import { default as Select, components } from "react-select";
 import { AiFillPlusCircle, AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 import { GoSettings } from "react-icons/go";
 
+
 /* -- For PDF -- */
 import { Worker } from "@react-pdf-viewer/core";
 import { Viewer } from "@react-pdf-viewer/core";
@@ -108,7 +109,7 @@ export default function GeneratePaper() {
   const calculateFilter = (filterList) => {
     setSelectedFilter(filterList);
 
-    var temp = QuestionsList;
+    var temp = [...QuestionsList];
 
     if (filterList.course_outcomes.length > 0) {
       temp = temp.filter((value) => {
@@ -136,15 +137,16 @@ export default function GeneratePaper() {
       });
     }
 
-    setFilteredList(temp);
+
+    setFilteredList(temp)
+    calculateSelectedQuestions({...ExamPaper},temp)
   };
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
   const [file, setFile] = useState(null);
 
-  useEffect(()=> () => {
+  const calculateSelectedQuestions = (tempExamPaper, filterList = FilteredList) => {
     let selectedQuestions = []
-    const tempExamPaper = {...ExamPaper}
     tempExamPaper.sections.forEach((tempQDetails)=>{
       tempQDetails.forEach(question => {
         if (question.subq.length > 0) {
@@ -168,9 +170,10 @@ export default function GeneratePaper() {
       });
     })
 
-
-    setSelectedList([...FilteredList].filter(question => !selectedQuestions.includes(question.value)))
-  },[QDetails,ExamPaper,FilteredList])
+    const temp = filterList.filter(question => !selectedQuestions.includes(question.value))
+    
+    setSelectedList(temp)
+  }
 
   const calculateMarks = (tempQDetails) => {
     setCurrentMarks(tempQDetails.reduce((accumlator, question) => accumlator + question.text.marks, 0))
@@ -198,6 +201,7 @@ export default function GeneratePaper() {
     let tempExamPaper = {...ExamPaper}
     tempExamPaper.sections[CurrentSection] = tempQDetails
     setExamPaper(tempExamPaper)
+    calculateSelectedQuestions(tempExamPaper)
   }
 
   const handleQuestionChange = (value, id) => {
@@ -256,6 +260,7 @@ export default function GeneratePaper() {
     let tempExamPaper = {...ExamPaper}
     tempExamPaper.sections[CurrentSection] = tempQDetails
     setExamPaper(tempExamPaper)
+    calculateSelectedQuestions(tempExamPaper)
   }
 
   const handleQuestionTextChange = (value, id) => {
@@ -278,6 +283,10 @@ export default function GeneratePaper() {
       default: break
     }
     setQDetails(tempQDetails)
+    let tempExamPaper = {...ExamPaper}
+    tempExamPaper.sections[CurrentSection] = tempQDetails
+    setExamPaper(tempExamPaper)
+    calculateSelectedQuestions(tempExamPaper)
   }
 
   const component = (props) => {
@@ -618,22 +627,6 @@ export default function GeneratePaper() {
                             startTime = startTime[0] + ":" + startTime[1] + " AM";
                           }
 
-                          console.log({
-                            MetaData: {
-                              CourseCode: value.code,
-                              CourseName: value.name,
-                              TotalMarks: TotalMarks,
-                              Year: Year.label,
-                              Stream: Stream.label,
-                              AY: AY,
-                              ExamType: ExamType.label,
-                              Semester: Semester.label,
-                              Date: ExamDate.split("-").join("."),
-                              Time: startTime + " to " + endTime,
-                              Instructions: Instructions,
-                            },
-                            ExamPaper,
-                          });
 
                           window.api.generatePaper({
                             MetaData: {
@@ -650,35 +643,19 @@ export default function GeneratePaper() {
                               Instructions: Instructions,
                             },
                             ExamPaper,
-                          })
-
-                          /*window.api
-                            .generateTex({
-                              MetaData: {
-                                CourseCode: value.code,
-                                CourseName: value.name,
-                                TotalMarks: TotalMarks,
-                                Year: Year.label,
-                                Stream: Stream.label,
-                                AY: AY,
-                                ExamType: ExamType.label,
-                                Semester: Semester.label,
-                                Date: ExamDate.split("-").join("."),
-                                Time: startTime + " to " + endTime,
-                                Instructions: Instructions,
-                              },
-                              ExamPaper,
-                            })
-                            .then(() => {
-                              window.api
-                                .getFile()
+                          }).then((value) => {
+                            console.log(value)
+                            window.api.getFile()
                                 .then((value) => {
+                                  console.log(value)
                                   setFile("data:application/pdf;base64," + value);
                                 })
                                 .then(() => {
                                   setPage("PDF");
                                 });
-                            }); */
+                          });
+
+                            
                         });
                       }}
                     >
@@ -690,7 +667,7 @@ export default function GeneratePaper() {
               {/* MAIN QUESTION 🔴 */}
               {QDetails.map((mainQuestion, mainIterator) => {
                 return <div key={"main" + mainIterator} className="flex flex-col w-full shadow-md m-2 ">
-                  <div className="text-[16px] h-full m-1 text-start flex gap-2 p-4 items-stretch justify-center ">
+                  <div className="flex-wrap text-[16px] h-full m-1 text-start flex gap-2 p-4 items-stretch justify-center ">
                     {/* That Delete Transition Here 🚇*/}
                     <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
                       <p className={`flex w-full h-full items-center justify-center 
@@ -726,7 +703,7 @@ export default function GeneratePaper() {
                     <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
                       {mainQuestion.text.marks}</p>
                     {/* Generate New Sub Question ⚙ */}
-                    <p id={mainIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
+                    <p id={mainIterator} className="flex-[1] p-[2px] flex items-center justify-center font-semibold text-2xl rounded border-primary border-[1px] hover:bg-primary hover:text-white text-primary"
                       onClick={_ => {
                         let tempQDetails = [...QDetails]
                         let id = parseInt(_.currentTarget.id)
@@ -741,11 +718,13 @@ export default function GeneratePaper() {
                         setQDetails(tempQDetails)
                       }}>
                       +</p>
+                      <p className="basis-full"></p>
+                      <img className="max-h-[150px] "src={mainQuestion.question_image} alt=""/>
                   </div>
                   {/* SUB QUESTION 🔴 */}
                   {mainQuestion.subq.map((subQuestion, subIterator) => {
                     return <div key={"sub" + subIterator} className="flex flex-col w-full ">
-                      <div className="text-[16px] ml-6 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                      <div className="flex-wrap text-[16px] ml-6 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
                         <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
                           <p className={`flex w-full h-full items-center justify-center 
                         text-primary  group-hover:hidden }`}>
@@ -801,12 +780,14 @@ export default function GeneratePaper() {
                             setQDetails(tempQDetails)
                           }}>
                           +</p>
+                          <p className="basis-full"></p>
+                          <img className="max-h-[150px] "src={subQuestion.question_image} alt=""/>
                       </div>
                       {/* SUB2X QUESTION 🔴 */}
                       {subQuestion.subq.map((sub2xQuestion, sub2xIterator) => {
                         return <div key={"sub" + sub2xIterator} className="flex flex-col w-full ">
 
-                          <div className="text-[16px] ml-10 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
+                          <div className="flex-wrap text-[16px] ml-10 h-full m-1 text-start flex gap-2 p-4 pt-0 items-stretch justify-center">
                             <div className="relative flex-[1] flex font-semibold text-xs rounded border-secondary border-[1px] group">
                               <p className={`flex w-full h-full items-center justify-center 
                           text-primary  group-hover:hidden }`}>
@@ -829,6 +810,8 @@ export default function GeneratePaper() {
                             />
                             <p className="flex-[1] p-[2px] flex items-center justify-center rounded border-primary border-[1px] text-primary">
                               {sub2xQuestion.text.marks}</p>
+                            <p className="basis-full"></p>
+                            <img className="max-h-[150px] "src={sub2xQuestion.question_image} alt=""/>
                           </div>
                         </div>
                       })}

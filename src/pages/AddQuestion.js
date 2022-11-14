@@ -218,7 +218,6 @@ export default function AddQuestion() {
                       value={value.value}
                       className="TextBox mb-2 w-full"
                       onChange={(event) => {
-                        console.log(Options);
                         const temp = [...Options];
                         temp[index] = { value: event.currentTarget.value };
                         setOptions(temp);
