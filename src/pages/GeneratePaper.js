@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { default as Select, components } from "react-select";
 import { AiFillPlusCircle, AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 import { GoSettings } from "react-icons/go";
-
+import workerUrl from "../pdf.worker.txt"
 
 /* -- For PDF -- */
 import { Worker } from "@react-pdf-viewer/core";
@@ -18,8 +18,8 @@ import { QuestionFilter } from "../components/Question";
 import { useLocation } from "react-router-dom";
 
 export default function GeneratePaper() {
-  const date = new Date();
 
+  const date = new Date();
   const location = useLocation()
 
   const CourseID = location.state
@@ -78,10 +78,12 @@ export default function GeneratePaper() {
   const [QDetails, setQDetails] = useState([]);
   const [CurrentSection,setCurrentSection] = useState(0)
 
+  const [url,setURL] = useState("")
+
   useEffect(() => {
     const getQuestions = async () => {
       var questions = await window.api.getQuestions({ course_id: CourseID });
-
+      setURL(await (await fetch(workerUrl)).url)
       questions = questions.map((value) => {
         value.value = value.question_id
         value.label = value.question_text
@@ -95,6 +97,7 @@ export default function GeneratePaper() {
       setFilteredList(questions);
       setSelectedList(questions)
     };
+
 
     getQuestions();
   }, [CourseID]);
@@ -590,7 +593,8 @@ export default function GeneratePaper() {
                 <div className="flex-[2] flex justify-end gap-3 items-center">
 
                   <span
-                    className=  {`text-base ${TotalMarks/2 >= CurrentMarks
+                    className=  {`text-base ${(TotalMarks/2 >= CurrentMarks && ExamType.value === 2) ||
+                      (TotalMarks >= CurrentMarks && ExamType.value < 2) 
                       ? "text-primary "
                       : "text-red-500 animate-[pulse_1s_ease-in_infinite] "
                       }  font-semibold `}
@@ -830,11 +834,10 @@ export default function GeneratePaper() {
 
         )}
       </div>
-
       {Page === "PDF" && (
         <div className="fixed w-[90vw] h-[90vh] flex items-center justify-center top-10 left-10">
           {file != null && (
-            <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.15.349/build/pdf.worker.min.js">
+            <Worker workerUrl= {url}>
               <div className="w-[100vw] h-[90vh]">
                 <Viewer
                   fileUrl={file}
