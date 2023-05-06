@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+   <head>
+      <style>
+         html {
+         font-family: Arial;
+         }
+         textarea {
+         font-family: monospace;
+         width: 100%;
+         }
+         code {
+         background: #eee;
+         }
+         code .string {
+         color: rgb(102, 153, 0);
+         }
+         code .keyword {
+         color: rgb(0, 119, 170);
+         }
+         .loader {
+          border: 10px solid #f3f3f3; /* Light grey */
+          border-top: 10px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+   </head>
+   <body>
+      <script src="promisejs/promise.js"></script>
+      <script src="pdftex.js"></script>
+      <h1>Exam Paper Demo by Mihir</h1>
+     
+      <h2>
+         Output
+      </h2>
+      <div class="loader" id="loader"></div> 
+      <div style="max-height: 30vh; max-width:650px; overflow: scroll;">
+        <canvas id="the-canvas" width="1000px" height="1000px"></canvas>
+      </div>
+      
+      <div id="tabs">
+         <div class="tab" id="tab_input">
+            <h2>
+              Input
+            </h2>
+
+            <br></br>
+
+              <textarea rows="30" id="input-default" hidden>
+\documentclass[addpoints]{exam}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\begin{document}
+
+\begin{large}
+                                  
+$$\textbf{Birla Vishwakarma Mahavidhyalaya(Engineering College)}$$
+$$\textbf{\textit{(An Autonomous Institute)}}$$
+$$\textbf{Third Year, B.Tech.(Computer Engineering)}$$
+$$\textbf{1st Mid Semester Examination(Online),Even Semester,AY 2021-22}$$
+
+\end{large}
+
+\begin{questions}
+
+                  
+\pointname{}
+\pointsinrightmargin
+\pointformat{\parbox{76pt}{[\thepoints] \\ 2U}}
+\question[15] Given the equation \(x^n + y^n = z^n\) for \(x,y,z\) and \(n\) positive integers. 
+
+\question[15] Given the equation \(x^n + y^n = z^n\) for \(x,y,z\) and \(n\) positive integers. 
+
+              </textarea>
+
+              Enter Question : <input type="text" id="question"  autocomplete="off"/>
+              Enter Marks : <input type="text" id="marks" autocomplete="off"/>
+              Enter Bloom Taxonomy : <input type="text" id="bloom" autocomplete="off"/>
+              
+              <br></br>
+              <br></br>
+              <button id="compile"> Add Question </button>
+              <button id="savelatex"> Save Latex </button>
+      </div>
+      
+      <script>
+
+        var marks,question,bloom;
+
+        function stringToArrayBuffer(binaryString) {
+          var binaryLen = binaryString.length;
+          var bytes = new Uint8Array(binaryLen);
+          for (var i = 0; i < binaryLen; i++) {
+             var ascii = binaryString.charCodeAt(i);
+             bytes[i] = ascii;
+          }
+
+          return bytes;
+       }
+
+       function saveByteArray(fileName, byte) {
+          var blob = new Blob([byte], {type: "text/vnd.latex-z"});
+          var link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = fileName;
+          link.click();
+        };    
+
+        function makeQuestion(question,marks,bloom){
+          var questionTemplate = "\n"+"\\"+"pointformat{"+"\\"+"parbox{76pt}{["+"\\"+"thepoints]"+" \\\\ "+bloom+"}}"
+            +"\n"+"\\"+"question["+marks+"] "+question+"\n";
+
+          return questionTemplate
+        }
+
+        var latexEndTemplate =  "\n"+"\\"+"end{questions}"+
+            "\n\n"+"\\"+"end{document}";
+
+        function loadPdf(data){
+
+            pdfData = atob(data);
+            var pdfjsLib = window['pdfjs-dist/build/pdf'];
+         
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+            
+            var loadingTask = pdfjsLib.getDocument({data: pdfData});
+            loadingTask.promise.then(function(pdf) {
+              console.log('PDF loaded');
+            
+              var pageNumber = 1;
+              pdf.getPage(pageNumber).then(function(page) {
+                console.log('Loaded');
+                
+                var scale = 1;
+                var viewport = page.getViewport({scale: scale});
+            
+                var canvas = document.getElementById('the-canvas');
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+            
+                var renderContext = {
+                  canvasContext: context,
+                  viewport: viewport
+                };
+                var renderTask = page.render(renderContext);
+                renderTask.promise.then(function () {
+                  document.getElementById("loader").hidden = true;
+                  console.log('Rendered');
+                });
+              });
+            }, function (reason) {
+              console.error(reason);
+            });
+         }
+         
+         var pdfData = document.getElementById("input-default").value
+        
+         var pdf_dataurl = undefined;
+         var compile = function(source_code) {
+            var pdftex = new PDFTeX();
+            pdftex.set_TOTAL_MEMORY(80*1024*1024).then(function() {
+         
+            console.time("Execution time");
+
+            var questionInput = document.getElementById("question").value;
+            var bloomInput = document.getElementById("bloom").value;
+            var marksInput = document.getElementById("marks").value;
+
+
+            if(questionInput != "")
+            {
+              source_code+=makeQuestion(questionInput,marksInput,bloomInput);
+              document.getElementById("input-default").value = source_code;
+            }
+            
+
+            source_code+=latexEndTemplate;
+
+            pdftex.compile(source_code).then(function(pdf_dataurl) {
+              console.timeEnd("Execution time");
+              if (pdf_dataurl === false)
+                 return;
+
+               pdfData = pdf_dataurl
+
+               
+
+               loadPdf(pdfData)
+             });
+           });
+         }
+
+         compile(pdfData); // Intial Load Default 🙂
+
+
+         // Compile Latex To PDF 
+         document.getElementById("compile").addEventListener("click", function(e) {
+           var source_code = document.getElementById("input-default").value;
+           compile(source_code);
+         });
+
+      
+         // Save Latex File 
+         document.getElementById("savelatex").addEventListener("click",function(e){
+           var source_code = document.getElementById("input-default").value;
+           source_code+=latexEndTemplate;
+           srouce_code = source_code.replace(/\s+$/gm, "");
+           var buffer = stringToArrayBuffer(source_code);
+           saveByteArray("latex.tex",buffer);
+         })
+         
+
+         // Loading Worker 😅
+         var pdftex_preload = new PDFTeX("pdftex-worker.js");
+         pdftex_preload = undefined;
+
+
+
+
+      </script>
+   </body>
+</html>

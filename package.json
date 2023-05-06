@@ -34,7 +34,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "nodemon --watch ./backend/* --exec \"electron .\"",
-    "dev": "concurrently \"yarn start-react\" \"wait-on http://localhost:3000 && yarn start-electron\" ",
+    "dev": "concurrently \"yarn start-react\" \"wait-on http://127.0.0.1:3000 && yarn start-electron\" ",
     "postinstall": "electron-builder install-app-deps",
     "pack-app": "yarn build-react && robocopy backend build/ && electron-builder --dir ",
     "pack-build": "electron-builder --dir",
