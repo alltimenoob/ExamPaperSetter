@@ -1,84 +1,53 @@
 {
-  "name": "exam-paper-setter",
-  "version": "0.1.0",
-  "private": true,
-  "main": "./backend/main.js",
-  "homepage": ".",
+  "name": "exampapersetter",
+  "version": "1.0.0",
+  "description": "An Electron application with React",
+  "main": "./out/main/index.js",
+  "author": "example.com",
+  "homepage": "https://www.electronjs.org",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:win": "npm run build && electron-builder --win --config",
+    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:linux": "npm run build && electron-builder --linux --config"
+  },
   "dependencies": {
-    "@babel/runtime": "^7.19.0",
+    "@electron-toolkit/preload": "^2.0.0",
+    "@electron-toolkit/utils": "^2.0.0",
+    "electron-is-dev": "^2.0.0",
+    "electron-log": "^5.0.0",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "sqlite3": "^5.0.11"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config": "^1.0.1",
+    "@electron-toolkit/eslint-config-prettier": "^1.0.1",
     "@react-pdf-viewer/core": "3.7.0",
     "@react-pdf-viewer/page-navigation": "^3.7.0",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
+    "@vitejs/plugin-react": "^4.0.4",
     "autoprefixer": "^10.4.8",
-    "cross-env": "^7.0.3",
-    "electron-is-dev": "^2.0.0",
-    "moment": "^2.29.4",
+    "electron": "^25.6.0",
+    "electron-builder": "^24.6.3",
+    "electron-vite": "^1.0.28",
+    "eslint": "^8.47.0",
+    "eslint-plugin-react": "^7.33.2",
     "pdfjs-dist": "2.15.349",
     "postcss": "^8.4.16",
+    "prettier": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
-    "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
+    "react-router-dom": "^6.17.0",
     "react-select": "^5.4.0",
     "react-toastify": "^9.0.8",
-    "sqlite3": "^5.0.11",
     "tailwindcss": "^3.1.8",
-    "web-vitals": "^2.1.0"
-  },
-  "scripts": {
-    "start-react": "cross-env BROWSER=none react-scripts start",
-    "build-react": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "start-electron": "nodemon --watch ./backend/* --exec \"electron .\"",
-    "dev": "concurrently \"yarn start-react\" \"wait-on http://localhost:3000 && yarn start-electron\" ",
-    "postinstall": "electron-builder install-app-deps",
-    "pack-app": "yarn build-react && robocopy backend build/ && electron-builder --dir ",
-    "pack-build": "electron-builder --dir",
-    "build": "yarn build-react && electron-builder"
-  },
-  "build": {
-    "extraMetadata": {
-      "main": "./build/main.js"
-    },
-    "asar": false,
-    "appId": "com.mihir.exam-paper-setter",
-    "files": [
-      "backend/*",
-      "src/**/*",
-      "src/*",
-      "node_modules/**/*"
-    ],
-    "directories": {
-      "buildResources": "assets"
-    }
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "concurrently": "^7.3.0",
-    "electron": "^20.1.0",
-    "electron-builder": "^23.3.3",
-    "nodemon": "^2.0.19",
-    "wait-on": "^6.0.1"
+    "vite": "^4.4.9",
+    "ws": "^8.14.2"
   }
 }
